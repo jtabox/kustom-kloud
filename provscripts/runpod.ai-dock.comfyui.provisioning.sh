@@ -7,6 +7,7 @@
 # Script tasks:
 # - apt update + install utils (mc ranger nano curl wget git unzip jq yq gpg aria2 eza)
 # - Download customized .bash_aliases with helper funcs
+# - Create the folder structure for syncthing and rclone downloads
 # - Write the rclone config file and download models
 #
 # All credit goes to AI-Dock for their great container images that I'm using: https://github.com/ai-dock
@@ -19,17 +20,16 @@ wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | sud
 echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | sudo tee /etc/apt/sources.list.d/gierens.list
 sudo chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list
 sudo apt-get update && sudo apt-get install --no-install-recommends -y \
-    mc ranger nano curl wget git unzip jq yq gpg aria2 eza
+    mc ranger highlight nano curl wget git unzip jq yq gpg aria2 eza
 
 
 # .bash_aliases (both root and comfyui user)
 printf "\n\nKustom Kloud Provisioner :: Downloading .bash_aliases\n"
-sudo wget -q -O /root/.bash_aliases https://raw.githubusercontent.com/jtabox/kustom-kloud/main/bash/custom.bash_aliases
-wget -q -O ~/.bash_aliases https://raw.githubusercontent.com/jtabox/kustom-kloud/main/bash/custom.bash_aliases
+sudo wget -q -O /root/.bash_aliases https://raw.githubusercontent.com/jtabox/kustom-kloud/main/provscripts/kustom.bash_aliases.sh
+wget -q -O ~/.bash_aliases https://raw.githubusercontent.com/jtabox/kustom-kloud/main/provscripts/kustom.bash_aliases.sh
 
 # rclone config
 printf "\n\nKustom Kloud Provisioner :: Writing rclone config\n"
-# TODO sudo?
 cat <<EOF > ~/temp.rclone.conf
 [ofvn]
 type = sftp
