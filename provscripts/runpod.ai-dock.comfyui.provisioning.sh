@@ -1,41 +1,37 @@
 #!/bin/bash
+################################################################################################################
+# __HIGHLY PERSONALIZED__ provisioning script for ComfyUI AI-Dock containers at runpod.io
+# Declared by the environment variable PROVISIONING_SCRIPT, downloaded and run during container init
+# https://raw.githubusercontent.com/jtabox/kustom-kloud/main/provscripts/runpod.ai-dock.comfyui.provisioning.sh
+#
+# Script tasks:
+# - apt update + install utils (mc ranger nano curl wget git unzip jq yq gpg aria2 eza)
+# - Download customized .bash_aliases with helper funcs
+# - Write the rclone config file and download models
+#
+# All credit goes to AI-Dock for their great container images that I'm using: https://github.com/ai-dock
+################################################################################################################
 
-############################################################################################################
-# This script is used to provision the runpod container with the necessary stuff.
-# Will be downloaded and run via the environment variable PROVISIONING_SCRIPT
-# https://raw.githubusercontent.com/jtabox/cloud-runs/runpod/comfy-provisioning.sh
-
-# * apt update + upgrade, install utils (mc, ranger, eza, curl, wget, git, unzip, jq, yq)
-# * Download .bashrc, .bash_aliases, civitaria.sh
-# * Write the rclone config file and also the mount credentials, initiate the mounts
-# ! I don't know if this is run as root or as normal user, will try with root first
-
-printf "\nKustom provisioner: Installing utils\n"
-
-apt-get update && apt-get install --no-install-recommends -y \
-    mc ranger nano curl wget git unzip jq yq gpg aria2
-# eza is special and wants its own attention
-mkdir -p /etc/apt/keyrings
-wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
-echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | tee /etc/apt/sources.list.d/gierens.list
-chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list
-apt-get update && apt-get install --no-install-recommends -y eza
+# apt update + install utils (eza is special and wants its own attention)
+printf "\n\nKustom Kloud Provisioner :: Installing utils\n"
+sudo mkdir -p /etc/apt/keyrings
+wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
+echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | sudo tee /etc/apt/sources.list.d/gierens.list
+sudo chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list
+sudo apt-get update && sudo apt-get install --no-install-recommends -y \
+    mc ranger nano curl wget git unzip jq yq gpg aria2 eza
 
 
-printf "\nKustom provisioner: Writing rclone config\n"
+# .bash_aliases (both root and comfyui user)
+printf "\n\nKustom Kloud Provisioner :: Downloading .bash_aliases\n"
+sudo wget -q -O /root/.bash_aliases https://raw.githubusercontent.com/jtabox/kustom-kloud/main/bash/custom.bash_aliases
+wget -q -O ~/.bash_aliases https://raw.githubusercontent.com/jtabox/kustom-kloud/main/bash/custom.bash_aliases
 
-cat <<EOF > /etc/rclone/rclone.conf
-[hetz-rw]
-type = sftp
-host = ${RUNPOD_SECRET_HETZ_USER}-sub1.your-storagebox.de
-user = ${RUNPOD_SECRET_HETZ_USER}-sub1
-port = 23
-pass = ${RUNPOD_SECRET_HETZ_PASSWD_RW}
-shell_type = unix
-md5sum_command = md5 -r
-sha1sum_command = sha1 -r
-
-[hetz-ro]
+# rclone config
+printf "\n\nKustom Kloud Provisioner :: Writing rclone config\n"
+# TODO sudo?
+cat <<EOF > ~/temp.rclone.conf
+[ofvn]
 type = sftp
 host = ${RUNPOD_SECRET_HETZ_USER}-sub2.your-storagebox.de
 user = ${RUNPOD_SECRET_HETZ_USER}-sub2
@@ -45,6 +41,8 @@ shell_type = unix
 md5sum_command = md5 -r
 sha1sum_command = sha1 -r
 EOF
+sudo mv ~/temp.rclone.conf /etc/rclone/rclone.conf && sudo chown root:root /etc/rclone/rclone.conf
+
 
 
 # Packages are installed after nodes so we can fix them...
