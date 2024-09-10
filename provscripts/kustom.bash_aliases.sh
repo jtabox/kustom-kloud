@@ -49,6 +49,7 @@ export PTCLR_BG_YELLOW="\e[0;43m"
 export PTCLR_BG_MAGENTA="\e[0;45m"
 export PTCLR_BG_CYAN="\e[0;46m"
 
+export RCLONE_REMOTE="ofvn"
 
 # functions
 ################## colored echo
@@ -112,3 +113,5 @@ function where-in-files {
   grep -RnisI "$1" *
 }
 
+# download helper script should be downloaded by now
+source ~/download.helper.sh
