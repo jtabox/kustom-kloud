@@ -2,10 +2,7 @@
 
 # Helper script that downloads files from various sources. Is sourced by other scripts.
 
-# Mappings
-source /opt/ai-dock/storage_monitor/etc/mappings.sh
-
-# rclone_download <target_dir> <file>
+# rclone_download <target_dir> <file>, symlinking happens automatically
 function rclone_download {
     local target_dir=$1
     local file=$2
@@ -13,13 +10,8 @@ function rclone_download {
     local target_file
     target_file="${WORKSPACE}storage/stable_diffusion/models/$target_dir/"$(basename "$file")
 
-    cecho yellow "Downloading and symlinking $source_file to $target_file"
+    cecho yellow "Downloading $source_file to $target_file"
     rclone copy "$source_file" "$target_file"
-
-    # Symlink
-    local storage_map_key="stable_diffusion/models/$target_dir"
-    ln -s "$target_file" "${storage_map["$storage_map_key"]}"
-
     cecho green "Done."
 
     return
