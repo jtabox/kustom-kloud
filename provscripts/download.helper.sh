@@ -23,7 +23,7 @@ function other_download {
     if [[ $1 =~ ^https://([a-zA-Z0-9_-]+\.)?huggingface\.co(/|$|\?) ]]; then
         auth_token="$RUNPOD_SECRET_HF_TOKEN"
     elif [[ $1 =~ ^https://([a-zA-Z0-9_-]+\.)?civitai\.com(/|$|\?) ]]; then
-        auth_token="$RUNPOD_SECRET_CIVITAI_TOKEN"
+        auth_token="$RUNPOD_SECRET_CIVITAI_API_KEY"
     fi
 
     wget --header="Authorization: Bearer $auth_token" -qnc --content-disposition --show-progress -e dotbytes=4M -P "$2" "$1"
