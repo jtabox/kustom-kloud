@@ -2,30 +2,38 @@
 ################################################################################################################
 # __HIGHLY PERSONALIZED__ provisioning script for my ComfyUI AI-Dock containers at runpod.io
 # https://raw.githubusercontent.com/jtabox/kustom-kloud/main/runpod.io/ai-dock.comfyui.provisioning.sh
-# Base image: https://github.com/ai-dock/comfyui
+#
+# It will most certainly NOT work for anyone else, but feel free to use it as a reference or whatever
+# Base image and code taken from https://github.com/ai-dock/comfyui (best container images for cloud gpu stuff)
 ################################################################################################################
 
 # some package installs (eza is special and wants its own attention)
 printf "\n:::::: Kustom Kloud Provisioner ::: Installing helper utils ::::::\n"
+
 sudo mkdir -p /etc/apt/keyrings
 wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
 echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | sudo tee /etc/apt/sources.list.d/gierens.list
 sudo chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list
-sudo apt-get update && sudo apt-get install -y --no-install-recommends mc ranger highlight jq aria2 eza
+sudo apt-get update && sudo apt-get install -y --no-install-recommends \
+    mc ranger highlight jq aria2 eza
 
-# customized .bash_aliases (both root and comfyui user) with helper functions and other helpful scripts
+# customized .bash_aliases with helper functions and other helpful scripts (both root and comfyui user)
 printf "\n:::::: Kustom Kloud Provisioner ::: Downloading helpful scripts ::::::\n"
-sudo wget -q -O /root/.bash_aliases https://raw.githubusercontent.com/jtabox/kustom-kloud/main/common/kustom.bash_aliases.sh
-sudo wget -q -O /root/download.helper.sh https://raw.githubusercontent.com/jtabox/kustom-kloud/main/common/download.helper.sh && sudo chmod +x ~/download.helper.sh
+
 wget -q -O ~/.bash_aliases https://raw.githubusercontent.com/jtabox/kustom-kloud/main/common/kustom.bash_aliases.sh
 wget -q -O ~/download.helper.sh https://raw.githubusercontent.com/jtabox/kustom-kloud/main/common/download.helper.sh && chmod +x ~/download.helper.sh
+wget -q -O ~/get.all.nodes.sh https://raw.githubusercontent.com/jtabox/kustom-kloud/main/common/get.all.nodes.sh && chmod +x ~/get.all.nodes.sh
+wget -q -O ~/get.all.models.sh https://raw.githubusercontent.com/jtabox/kustom-kloud/main/common/get.all.models.sh && chmod +x ~/get.all.models.sh
+
+sudo cp ~/.bash_aliases /root/.bash_aliases
+sudo cp ~/download.helper.sh ~/get.all.nodes.sh ~/get.all.models.sh /root/
 
 source ~/.bash_aliases
 
 # rclone config
-cecho cyan ":::::: Kustom Kloud Provisioner ::: Writing rclone config ::::::"
+cecho cyan ":::::: Kustom Kloud Provisioner ::: Creating rclone config and login info ::::::"
 cat <<EOF > ~/temp.rclone.conf
-[ofvn]
+[${HETZ_DRIVE}]
 type = sftp
 host = ${HETZ_USER}-sub2.your-storagebox.de
 user = ${HETZ_USER}-sub2
@@ -54,8 +62,10 @@ Web Password: $WEB_PASSWORD
 Web Token:    $WEB_TOKEN
 
 EOF
+sudo cp ~/login_info.txt /root/login_info.txt
 
-# the below are from the original provisioning script
+
+# the below are heavily modified code from the original provisioning script
 # https://github.com/ai-dock/comfyui/blob/main/config/provisioning/default.sh
 
 # comfyui venv
@@ -81,4 +91,4 @@ if [[ ! -d $path ]]; then
 fi
 
 # done
-cecho cyan ":::::: Kustom Kloud Provisioner ::: Provisioning script complete"
+cecho green ":::::: Kustom Kloud Provisioner ::: Provisioning script complete"

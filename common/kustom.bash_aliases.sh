@@ -31,6 +31,7 @@ alias wget='wget -c'
 
 # constants
 export PTCLR_CLEAR="\e[0;0m"
+
 # Colored letters
 export PTCLR_FG_GRAY="\e[1;30m"
 export PTCLR_FG_RED="\e[0;31m"
@@ -42,7 +43,6 @@ export PTCLR_FG_BLUE="\e[1;34m"
 export PTCLR_FG_LIGHTBLUE="\e[1;36m"
 export PTCLR_FG_CYAN="\e[0;36m"
 export PTCLR_FG_MAGENTA="\e[1;35m"
-
 # Colored background
 export PTCLR_BG_GRAY="\e[0;40m"
 export PTCLR_BG_RED="\e[0;41m"
@@ -51,8 +51,6 @@ export PTCLR_BG_BLUE="\e[0;44m"
 export PTCLR_BG_YELLOW="\e[0;43m"
 export PTCLR_BG_MAGENTA="\e[0;45m"
 export PTCLR_BG_CYAN="\e[0;46m"
-
-export RCLONE_REMOTE="ofvn"
 
 # functions
 ################## colored echo
@@ -85,7 +83,7 @@ cecho () {
         *) colorvar=$PTCLR_CLEAR;;
     esac
     echo
-    echo -e "$colorvar$message$PTCLR_CLEAR"
+    echo -e "${colorvar}${message}${PTCLR_CLEAR}"
     echo
     return
 }
@@ -97,9 +95,9 @@ whereis () {
         cecho red "Where's what?"
     else
         cecho yellow "Looking for $1..."
-        cecho yellow "which:"
+        cecho yellow "which :"
         which "$1"
-        cecho yellow "find"
+        cecho yellow "find :"
         sudo find "$(pwd)" -xdev -name "*$1*"
         cecho green "Done."
     fi
