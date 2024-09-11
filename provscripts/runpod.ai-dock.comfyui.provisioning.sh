@@ -70,14 +70,14 @@ EOF
 # done
 
 # will do it manually for now, need to source the mappings and the function
-printf "\n:::::: Kustom Kloud Provisioner ::: Downloading basic models\n"
+# printf "\n:::::: Kustom Kloud Provisioner ::: Downloading basic models\n"
 
-rclone_download "ckpt" "sdmodels/Checkpoints/Flux/flux1-dev-fp8.safetensors"
-rclone_download "ckpt" "sdmodels/Checkpoints/Flux/FluxBananadiffusion_v01NF4.safetensors"
-rclone_download "clip" "sdmodels/CLIP/t5xxl_fp8_e4m3fn.safetensors"
-rclone_download "clip" "sdmodels/CLIP/ViT-L-14-BEST-smooth-GmP-TE-only-HF-format.safetensors"
-rclone_download "lora" "sdmodels/Lora/Flux/AndroFlux-v26.safetensors"
-rclone_download "vae" "sdmodels/VAE/flux-ae.safetensors"
+# rclone_download "ckpt" "sdmodels/Checkpoints/Flux/flux1-dev-fp8.safetensors"
+# rclone_download "ckpt" "sdmodels/Checkpoints/Flux/FluxBananadiffusion_v01NF4.safetensors"
+# rclone_download "clip" "sdmodels/CLIP/t5xxl_fp8_e4m3fn.safetensors"
+# rclone_download "clip" "sdmodels/CLIP/ViT-L-14-BEST-smooth-GmP-TE-only-HF-format.safetensors"
+# rclone_download "lora" "sdmodels/Lora/Flux/AndroFlux-v26.safetensors"
+# rclone_download "vae" "sdmodels/VAE/flux-ae.safetensors"
 
 # this is from the original script, to download nodes
 source /opt/ai-dock/etc/environment.sh
@@ -112,7 +112,6 @@ NODES=(
     "https://github.com/ltdrdata/ComfyUI-Impact-Pack"
     "https://github.com/ltdrdata/ComfyUI-Inspire-Pack"
 )
-# "https://github.com/melMass/comfy_mtb"
 
 # AUTO_UPDATE=true
 # COMFYUI_VENV_PIP=/opt/environments/python/comfyui/bin/pip
