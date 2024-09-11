@@ -14,12 +14,11 @@
     "Template Visibility": "Private",
     "Environment Variables": {
         "CF_QUICK_TUNNELS": false,
-        "AUTO_UPDATE": true,
         "PROVISIONING_SCRIPT": "https://raw.githubusercontent.com/jtabox/kustom-kloud/main/runpod.io/ai-dock.comfyui.provisioning.sh",
         "WORKSPACE": "/workspace",
-        "RCLONE_REMOTE": "ofvn",
+        "HETZ_DRIVE": "ofvn",
         "HETZ_USER": "{{ RUNPOD_SECRET_HETZ_USER }}",
-        "HETZ_PASS": "{{ RUNPOD_SECRET_HETZ_PASS }}",
+        "HETZ_PWD_RO": "{{ RUNPOD_SECRET_HETZ_PWD_RO }}",
         "HF_TOKEN": "{{ RUNPOD_SECRET_HF_TOKEN }}",
         "CIVITAI_API_KEY": "{{ RUNPOD_SECRET_CIVITAI_API_KEY }}",
         "OPENAI_API_KEY": "{{ RUNPOD_SECRET_OPENAI_API_KEY }}"
