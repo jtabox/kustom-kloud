@@ -3,6 +3,9 @@
 # https://raw.githubusercontent.com/jtabox/kustom-kloud/main/provscripts/kustom.bash_aliases.sh
 #
 
+# lol
+PS1='\[\e[92;1m\]\A \[\e[0;94m\]\h\[\e[36m\].\[\e[94m\]\u $(if [[ $? -eq 0 ]]; then echo -e "\[\e[30;102;1m\]0"; else echo -e "\[\e[97;101;1m\]$?"; fi)\[\e[0m\] \[\e[38;5;202m\]\w \[\e[0m\]'
+
 # aliases
 alias ..='cd ..'
 alias ...='cd ../..'
