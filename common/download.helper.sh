@@ -21,7 +21,7 @@ function fetch_url {
     else
         target_dir="$2"
     fi
-    if auth_token; then
+    if [ "$auth_token" != "" ]; then
         wget --header="Authorization: Bearer $auth_token" -qnc --content-disposition --show-progress -e dotbytes=4M -P "$target_dir" "$1"
     else
         rclone copy -P "${HETZ_DRIVE}:$1" "$target_dir"

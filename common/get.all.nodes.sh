@@ -31,6 +31,7 @@ NODES=(
     "https://github.com/ssitu/ComfyUI_UltimateSDUpscale"
     "https://github.com/talesofai/comfyui-browser"
     "https://github.com/yolain/ComfyUI-Easy-Use"
+    "https://github.com/giriss/comfy-image-saver"
 )
 
 # comfyui venv
@@ -48,5 +49,5 @@ for repo in "${NODES[@]}"; do
     install_string="${repo##*/} ${install_string}"
 done
 
-$COMFYUI_VENV_PYTHON "${COMFYUI_PATH}/custom_nodes/ComfyUI-Manager/cm-cli.py install ${install_string}"
+$COMFYUI_VENV_PYTHON "${COMFYUI_PATH}/custom_nodes/ComfyUI-Manager/cm-cli.py" install ${install_string}
 
