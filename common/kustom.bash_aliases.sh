@@ -122,21 +122,17 @@ function fetch_url {
     if [ $# -eq 0 ]; then
         cecho red "Usage: fetch_url <url> [target_dir (current dir if not specified)]"
         return
-    fi
-    if [[ $1 =~ ^https://([a-zA-Z0-9_-]+\.)?huggingface\.co(/|$|\?) ]]; then
-        auth_token="$HF_TOKEN"
-    elif [[ $1 =~ ^https://([a-zA-Z0-9_-]+\.)?civitai\.com(/|$|\?) ]]; then
-        auth_token="$CIVITAI_API_KEY"
-    else
-        auth_token=""
-    fi
-    if [ $# -eq 1 ]; then
-        target_dir="."
+    elif [ $# -eq 1 ]; then
+        target_dir="$(pwd)"
     else
         target_dir="$2"
     fi
-    if [ "$auth_token" != "" ]; then
-        wget --header="Authorization: Bearer $auth_token" -qnc --content-disposition --show-progress -e dotbytes=4M -P "$target_dir" "$1"
+
+    if [[ $1 =~ ^https://([a-zA-Z0-9_-]+\.)?huggingface\.co(/|$|\?) ]]; then
+        wget --header="Authorization: Bearer $HF_TOKEN" -qnc --content-disposition --show-progress -e dotbytes=4M -P "$target_dir" "$1"
+    elif [[ $1 =~ ^https://([a-zA-Z0-9_-]+\.)?civitai\.com(/|$|\?) ]]; then
+        full_url="$1&token=${CIVITAI_API_KEY}"
+        aria2c --continue=true --split=16 --max-connection-per-server=16 --min-split-size=1M --max-concurrent-downloads=1 --dir="$target_dir" "$full_url"
     else
         rclone copy -P "${HETZ_DRIVE}:$1" "$target_dir"
     fi
