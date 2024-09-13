@@ -55,4 +55,5 @@ for model in "${VAE_MODELS[@]}"; do
     fetch_url "$model" "${SD_STORAGE_DIR}/vae"
 done
 
+
 cecho green "::::: Finished downloading the models :::::"

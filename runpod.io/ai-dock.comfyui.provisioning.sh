@@ -21,12 +21,11 @@ sudo apt-get update && sudo apt-get install -y --no-install-recommends \
 printf "\n:::::: Kustom Kloud Provisioner ::: Downloading helpful scripts ::::::\n"
 
 wget -q -O ~/.bash_aliases https://raw.githubusercontent.com/jtabox/kustom-kloud/main/common/kustom.bash_aliases.sh
-wget -q -O ~/download.helper.sh https://raw.githubusercontent.com/jtabox/kustom-kloud/main/common/download.helper.sh && chmod +x ~/download.helper.sh
 wget -q -O ~/get.all.nodes.sh https://raw.githubusercontent.com/jtabox/kustom-kloud/main/common/get.all.nodes.sh && chmod +x ~/get.all.nodes.sh
 wget -q -O ~/get.all.models.sh https://raw.githubusercontent.com/jtabox/kustom-kloud/main/common/get.all.models.sh && chmod +x ~/get.all.models.sh
 
 sudo cp ~/.bash_aliases /root/.bash_aliases
-sudo cp ~/download.helper.sh ~/get.all.nodes.sh ~/get.all.models.sh /root/
+sudo cp ~/get.all.nodes.sh ~/get.all.models.sh /root/
 
 source ~/.bash_aliases
 

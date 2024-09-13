@@ -43,7 +43,7 @@ source /opt/ai-dock/bin/venv-set.sh comfyui
 
 # python cm-cli.py install node_dir1 node_dir2 ...
 
-COMFYUI_PATH="/opt/ComfyUI"
+
 install_string=""
 for repo in "${NODES[@]}"; do
     install_string="${repo##*/} ${install_string}"
