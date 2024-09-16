@@ -15,7 +15,7 @@ wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | sud
 echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | sudo tee /etc/apt/sources.list.d/gierens.list
 sudo chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list
 sudo apt-get update && sudo apt-get install -y --no-install-recommends \
-    mc ranger highlight jq aria2 eza
+    mc ranger highlight jq aria2 eza ncdu
 
 # customized .bash_aliases with helper functions and other helpful scripts (both root and comfyui user)
 printf "\n:::::: Kustom Kloud Provisioner ::: Downloading helpful scripts ::::::\n"
@@ -27,6 +27,7 @@ wget -q -O ~/get.all.models.sh https://raw.githubusercontent.com/jtabox/kustom-k
 sudo cp ~/.bash_aliases /root/.bash_aliases
 sudo cp ~/get.all.nodes.sh ~/get.all.models.sh /root/
 
+# shellcheck disable=SC1090
 source ~/.bash_aliases
 
 # rclone config
