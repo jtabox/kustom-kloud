@@ -134,7 +134,10 @@ function fetch_url {
         full_url="$1&token=${CIVITAI_API_KEY}"
         aria2c --continue=true --split=16 --max-connection-per-server=16 --min-split-size=1M --max-concurrent-downloads=1 --dir="$target_dir" "$full_url"
     else
-        rclone copy -P "${HETZ_DRIVE}:$1" "$target_dir"
+        # hetzner no longer available
+        #rclone copy -P "${HETZ_DRIVE}:$1" "$target_dir"
+        cecho red "Couldn't parse URL: $1"
+
     fi
     return
 }
