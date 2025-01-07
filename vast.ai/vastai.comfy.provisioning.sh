@@ -39,20 +39,20 @@ wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | sud
 echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | sudo tee /etc/apt/sources.list.d/gierens.list
 sudo chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list
 sudo apt-get update && sudo apt-get install -y --no-install-recommends \
-    mc ranger highlight jq aria2 eza ncdu
+    mc ranger highlight jq aria2 eza ncdu wget
 
 # customized .bash_aliases with helper functions and other helpful scripts (both root and comfyui user)
 printf "\n:::::: Kustom Kloud Provisioner ::: Downloading helpful scripts ::::::\n"
 
-wget -q -O ~/.bash_aliases https://raw.githubusercontent.com/jtabox/kustom-kloud/main/common/kustom.bash_aliases.sh
-wget -q -O ~/get.all.nodes.sh https://raw.githubusercontent.com/jtabox/kustom-kloud/main/common/get.all.nodes.sh && chmod +x ~/get.all.nodes.sh
-wget -q -O ~/get.all.models.sh https://raw.githubusercontent.com/jtabox/kustom-kloud/main/common/get.all.models.sh && chmod +x ~/get.all.models.sh
+sudo wget -q -O /root/.bash_aliases https://raw.githubusercontent.com/jtabox/kustom-kloud/main/common/kustom.bash_aliases.sh
+sudo wget -q -O /root/get.all.nodes.sh https://raw.githubusercontent.com/jtabox/kustom-kloud/main/common/get.all.nodes.sh && sudo chmod +x /root/get.all.nodes.sh
+sudo wget -q -O /root/get.all.models.sh https://raw.githubusercontent.com/jtabox/kustom-kloud/main/common/get.all.models.sh && sudo chmod +x /root/get.all.models.sh
 
-sudo cp ~/.bash_aliases /root/.bash_aliases
-sudo cp ~/get.all.nodes.sh ~/get.all.models.sh /root/
+# sudo cp ~/.bash_aliases /root/.bash_aliases
+# sudo cp ~/get.all.nodes.sh ~/get.all.models.sh /root/
 
 # shellcheck disable=SC1090
-source ~/.bash_aliases
+source /root/.bash_aliases
 
 # can also write a simple text file with the login info for the web portal, for easy access
 cat <<EOF > ~/login_info.txt
@@ -72,7 +72,7 @@ Web Token:    $WEB_TOKEN
 EOF
 sudo cp ~/login_info.txt /root/login_info.txt
 
-touch ~/.no_auto_tmux
+# touch ~/.no_auto_tmux
 sudo touch /root/.no_auto_tmux
 
 # the below are heavily modified code from the original provisioning script
