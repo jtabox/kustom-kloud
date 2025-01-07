@@ -10,6 +10,25 @@
 
 # some package installs (eza is special and wants its own attention)
 printf "\n:::::: Kustom Kloud Provisioner ::: Installing helper utils ::::::\n"
+echo "Debug:"
+echo "whoami: $(whoami)"
+echo "pwd: $(pwd)"
+echo "ls -la: $(ls -la)"
+echo "ls -la /root: $(ls -la /root)"
+echo "ls -la /home: $(ls -la /home)"
+
+# try touching a file in root dir and see if it succeeds
+if touch /root/testfile.txt; then
+    echo "Successfully touched /root/testfile.txt"
+else
+    echo "Failed to touch /root/testfile.txt"
+fi
+
+if sudo touch /root/testfile.txt; then
+    echo "Successfully touched /root/testfile.txt with sudo"
+else
+    echo "Failed to touch /root/testfile.txt with sudo"
+fi
 
 sudo mkdir -p /etc/apt/keyrings
 wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
@@ -49,6 +68,8 @@ Web Token:    $WEB_TOKEN
 EOF
 sudo cp ~/login_info.txt /root/login_info.txt
 
+touch ~/.no_auto_tmux
+sudo touch /root/.no_auto_tmux
 
 # the below are heavily modified code from the original provisioning script
 # https://github.com/ai-dock/comfyui/blob/main/config/provisioning/default.sh
