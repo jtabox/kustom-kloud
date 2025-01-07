@@ -131,6 +131,8 @@ function fetch_url {
     if [[ $1 =~ ^https://([a-zA-Z0-9_-]+\.)?huggingface\.co(/|$|\?) ]]; then
         wget --header="Authorization: Bearer $HF_TOKEN" -qnc --content-disposition --show-progress -e dotbytes=4M -P "$target_dir" "$1"
     elif [[ $1 =~ ^https://([a-zA-Z0-9_-]+\.)?civitai\.com(/|$|\?) ]]; then
+        # AI-Dock uses $CIVITAI_TOKEN, but the official used everywhere else is $CIVITAI_API_KEY
+        if [ "$CIVITAI_API_KEY" = "" ]; then CIVITAI_API_KEY=$CIVITAI_TOKEN; fi
         full_url="$1&token=${CIVITAI_API_KEY}"
         aria2c --continue=true --split=16 --max-connection-per-server=16 --min-split-size=1M --max-concurrent-downloads=1 --dir="$target_dir" "$full_url"
     else
