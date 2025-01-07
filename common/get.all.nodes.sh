@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC1091
 # This is run manually after the initial provisioning and downloads/installs the ComyUI nodes below
 # It uses https://github.com/ltdrdata/ComfyUI-Manager/blob/main/docs/en/cm-cli.md for complete install
 
@@ -49,6 +50,6 @@ for repo in "${NODES[@]}"; do
     install_string="${repo##*/} ${install_string}"
 done
 
-$COMFYUI_VENV_PYTHON "${COMFYUI_PATH}/custom_nodes/ComfyUI-Manager/cm-cli.py" install ${install_string}
+$COMFYUI_VENV_PYTHON "${COMFYUI_PATH}/custom_nodes/ComfyUI-Manager/cm-cli.py" install "${install_string}"
 
 cecho green "::::: Finished installing the nodes :::::"
