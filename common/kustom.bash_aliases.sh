@@ -4,7 +4,7 @@
 #
 
 # lol
-PS1='\[\e[92;1m\]\A \[\e[0;94m\]\h\[\e[36m\].\[\e[94m\]\u $(if [[ $? -eq 0 ]]; then echo -e "\[\e[30;102;1m\]0"; else echo -e "\[\e[97;101;1m\]$?"; fi)\[\e[0m\] \[\e[38;5;202m\]\w \[\e[0m\]'
+PS1='\[\e[92;1m\]\A \[\e[94m\]\u $(if [[ $? -eq 0 ]]; then echo -e "\[\e[30;102;1m\]0"; else echo -e "\[\e[97;101;1m\]$?"; fi)\[\e[0m\] \[\e[38;5;202m\]\w \[\e[0m\]'
 
 # aliases
 alias ..='cd ..'
@@ -14,17 +14,34 @@ alias cd..='cd ..'
 alias cd...='cd ../..'
 alias ck='highlight -O xterm256 --force'
 alias cp='cp --verbose'
-alias dir-diff='diff -urp'
+alias apt-clean='sudo apt-get clean && sudo apt-get autoremove'
 alias apt-get-installed-progs='sudo dpkg --get-selections'
+alias dsprune='sudo docker system prune -a -f --volumes && sudo docker volume prune -a -f'
+alias dir-diff='diff -urp'
+alias dcud='docker compose pull && docker compose up -d'
+alias dccf='docker compose config'
+alias dmesg='sudo dmesg'
+alias epoch='date +%s'
 alias grep='GREP_COLORS="mt=1;37;41" LANG=C grep --color=auto'
 alias grepproc='ps -aux | grep'
 alias howbig='sudo du -hd 1'
 alias ip-ext='curl -s ifconfig.me'
+# shellcheck disable=SC2142
+alias ip-all='ip a | perl -nle"/(\d+\.\d+\.\d+\.\d+)/ && print $1"'
 alias l='eza -ahMl --smart-group --icons --time-style=long-iso --group-directories-first --color-scale --git-repos'
+alias ll='ls -lFah --group-directories-first --color=auto'
 alias mv='mv --verbose'
+alias scan-host='nmap -sP'
+alias sssh='ssh -o UserKnownHostsFile=/dev/null -o GlobalKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
+alias sccp='scp -o UserKnownHostsFile=/dev/null -o GlobalKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
+alias show-conns='ss -p | cat'
+alias show-ports='sudo lsof -Pan -i tcp -i udp'
+alias show-mem-strings='sudo dd if=/dev/mem | cat | strings'
 alias sssh='ssh -o UserKnownHostsFile=/dev/null -o GlobalKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
 alias sccp='scp -o UserKnownHostsFile=/dev/null -o GlobalKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
 alias untar='tar -xzvf'
+alias updall='sudo apt-get update && sudo apt-get upgrade -y'
+alias updboot='sudo apt-get update && sudo apt-get upgrade -y && sudo reboot'
 alias wget-all='wget --random-wait -r -p -e robots=off -U mozilla -o $HOME/wget_all_log.txt'
 alias wget-images='wget -nd -r -l 2 -A jpg,jpeg,png,gif,bmp,webp'
 alias wget='wget -c'
@@ -51,8 +68,6 @@ export PTCLR_BG_BLUE="\e[0;44m"
 export PTCLR_BG_YELLOW="\e[0;43m"
 export PTCLR_BG_MAGENTA="\e[0;45m"
 export PTCLR_BG_CYAN="\e[0;46m"
-
-export COMFYUI_PATH="/opt/ComfyUI"
 
 # functions
 ################## colored echo
@@ -105,6 +120,18 @@ whereis () {
     fi
 }
 
+# Check if a port is bound or list all of the bound ports if no arg
+function check-port() {
+    if [ -z "$1" ]; then
+        cecho cyan "No argument given, listing all bound ports (netstat -tulpn):"
+        sudo netstat -tulpn
+    else
+        cecho cyan "Checking port $1:"
+        sudo netstat -tulpn | grep :"$1"
+    fi
+    cecho green 'Done.'
+}
+
 # Substitutes a string in a file
 function subst-in-file {
   [ "$#" -ne 3 ] && cecho red "Usage:\nsubst-in-file <in file> <find what> <replace with>" && exit 1
@@ -114,6 +141,68 @@ function subst-in-file {
 # Looks for <pattern> in files in current directory
 function where-in-files {
   grep -RnisI "$1" *
+}
+
+# history grep - changed name to hrep
+function hrep() {
+  history | GREP_COLORS="mt=1;37;41" LANG=C grep --color=auto -i "$@"
+}
+
+# list zombie processes - changed name to zombies
+function zombies() {
+  ps aux | awk '{if ($8=="Z") { print $2 }}'
+}
+
+# Adds <path> in PATH if it's a directory and not already in PATH
+function path-add {
+  if [ -d "$1" ] && [[ ":$PATH:" != *":$1:"* ]]; then
+    PATH="${PATH:+"$PATH:"}$1"
+  fi
+}
+
+# mamba
+function mb() {
+  if [ -z "$1" ]; then
+    echo -e "\n${PTCLR_BG_GREEN}Activating base environment...${PTCLR_CLEAR}\n"
+    echo -e "$PTCLR_FG_GREEN"
+    mamba deactivate
+    mamba activate base
+    echo -e "Using:\n"
+    echo -e "Python: $(which -p python)"
+    echo -e "Pip: $(which -p pip)\n"
+    echo -e "$PTCLR_CLEAR"
+  elif [ "$1" = "d" ]; then
+    echo -e "\n${PTCLR_BG_GREEN}Deactivating current environment (${CONDA_DEFAULT_ENV})...${PTCLR_CLEAR}\n"
+    echo -e "$PTCLR_FG_GREEN"
+    mamba deactivate
+    echo -e "Using:\n"
+    echo -e "Python3: $(which -p python3)"
+    echo -e "Pip: $(which -p pip)\n"
+    echo -e "$PTCLR_CLEAR"
+  elif [ "$1" = "e" ]; then
+    echo -e "\n${PTCLR_BG_YELLOW}Conda environments list:${PTCLR_CLEAR}\n"
+    echo -e "$PTCLR_FG_YELLOW"
+    mamba env list
+    echo -e "$PTCLR_CLEAR"
+  elif [ "$1" = "u" ]; then
+    echo -e "\n${PTCLR_BG_GREEN}Updating all packages...${PTCLR_CLEAR}\n"
+    echo -e "$PTCLR_FG_GREEN"
+    mamba update --all
+    echo -e "$PTCLR_CLEAR"
+  elif [ "$1" = "c" ]; then
+    echo -e "\n${PTCLR_BG_RED}Cleaning all packages...${PTCLR_CLEAR}\n"
+    echo -e "$PTCLR_FG_RED"
+    mamba clean --all
+    echo -e "$PTCLR_CLEAR"
+   else
+     echo -e "\n${PTCLR_BG_GREEN}Activating environment $1...${PTCLR_CLEAR}\n"
+     echo -e "$PTCLR_FG_GREEN"
+     mamba activate "$1"
+     echo -e "Using:\n"
+     echo -e "Python: $(which -p python)"
+     echo -e "Pip: $(which -p pip)\n"
+     echo -e "$PTCLR_CLEAR"
+   fi
 }
 
 # fetch_url <url> [target dir]
@@ -146,3 +235,6 @@ function fetch_url {
 
 export -f cecho
 export -f fetch_url
+
+path-add /home/user/progs/system
+path-add /home/user/.local/bin
