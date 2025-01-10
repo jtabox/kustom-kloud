@@ -134,7 +134,7 @@ function check-port() {
 
 # Substitutes a string in a file
 function subst-in-file {
-  [ "$#" -ne 3 ] && cecho red "Usage:\nsubst-in-file <in file> <find what> <replace with>" && exit 1
+  [ "$#" -ne 3 ] && cecho red "Usage:\nsubst-in-file <in file> <find what> <replace with>" && return
   perl -i.orig -pe 's/'"$2"'/'"$3"'/g' "$1"
 }
 
@@ -233,8 +233,129 @@ function fetch_url {
     return
 }
 
+# Advanced downloader for AI models with multiple functions
+
+# Accepts a target code (or whatever the second argument is) and returns the corresponding folder path
+function get-targetfolder {
+    targetCode=$1
+    # The folder constants
+    aiBaseFolder="$COMFYUI_PATH/models"
+    modelFolders=(
+        ["inc"]="inc"
+        ["ckpt-flux"]="checkpoints/Flux"
+        ["ckpt-pdxl"]="checkpoints/PDXL"
+        ["ckpt-sd15"]="checkpoints/SD15"
+        ["ckpt-sdxl"]="checkpoints/SDXL"
+        ["lora-flux"]="loras/Flux"
+        ["lora-pdxl"]="loras/PDXL"
+        ["lora-sd15"]="loras/SD15"
+        ["lora-sdxl"]="loras/SDXL"
+    )
+
+    # Check if the target code is a valid key in the modelFolders dictionary
+    if [[ -v modelFolders[$targetCode] ]]; then
+        echo "$aiBaseFolder/${modelFolders[$targetCode]}"
+    else
+        # If it's not a valid code, just return the folder as it is
+        echo "$targetCode"
+    fi
+}
+
+function getaimodel {
+    # Check if the 2 needed environment variables are set
+    if [[ -z $HF_TOKEN || -z $CIVITAI_API_KEY ]]; then
+        cecho red "Error! HF_TOKEN and/or CIVITAI_API_KEY environment variable not set!"
+        return 1
+    fi
+
+    # Check if at least the model-url argument is given
+    if [[ $# -lt 1 ]]; then
+        cecho red "\nError! No download URL specified!\n"
+        cecho red "Usage: getaimodel <model-complete-url> [target-code/dir]\n"
+        cecho red "Target codes:      \n* inc\n* ckpt | lora '-' flux | pdxl | sdxl | sd15"
+        return 1
+    fi
+    # If only the model-url is given, set the target dir to the current directory
+    if [[ $# -lt 2 ]]; then
+        outputFolder=$(get-targetfolder "$(pwd)")
+    else
+        outputFolder=$(get-targetfolder "$2")
+    fi
+
+    # Model from HuggingFace
+    if [[ $1 == *"huggingface.co"* || $1 == *"hf.co"* ]]; then
+        # Figure out if it's repo or file download, from the split url size
+        IFS='/' read -r -a urlParts <<< "$1"
+        if [[ ${#urlParts[@]} -le 7 ]]; then
+            # Hopefully a repo download (either 5 or 7 parts, depending on if branch is included)
+            modelCreator=${urlParts[3]}
+            modelName=${urlParts[4]}
+            modelFullPath="$outputFolder/$modelName\___$modelCreator"
+            cecho green "\nDownloading whole model repo:"
+            cecho green "From: HuggingFace"
+            cecho green "Repo: $modelName"
+            cecho green "To:   $modelFullPath\n"
+
+            if [[ -d $modelFullPath && $(ls -A "$modelFullPath") ]]; then
+                # There already exists a non-empty folder with that name, git clone will complain
+                cecho orange "Warning! A non-empty folder with the same name exists already:\n'$modelFullPath'"
+                cecho orange "The folder and its contents will be deleted if you proceed, so make sure you've backed it up as necessary before continuing here.\nProceed? - [y]/n :: "
+                read -r userResponse
+                if [[ ${userResponse,,} == 'n' ]]; then
+                    cecho red "\nExiting..."
+                    return 1
+                else
+                    rm -rf "$modelFullPath"
+                fi
+            fi
+            # Clone the model repo using git
+            git clone --depth=1 --recurse-submodules --shallow-submodules --single-branch --jobs=16 --progress "$1" "$modelFullPath"
+        else
+            # File download (8 parts, with the file name at the end)
+            # Remove the query string from the url and parse it
+            IFS='/' read -r -a urlParts <<< "$1"
+            modelCreator=${urlParts[3]}
+            modelName=${urlParts[4]}
+            modelFile=${urlParts[7]}
+            # For HuggingFace models, also form the full path with the model name
+            modelFullPath="$outputFolder/$modelName\___$modelCreator"
+            cecho red "\nDownloading specific model file:"
+            cecho red "From: HuggingFace"
+            cecho red "File: $modelFile"
+            cecho red "To:   $modelFullPath\n"
+
+            if [[ ! -d $modelFullPath ]]; then
+                mkdir -p "$modelFullPath"
+            fi
+            # Download the model using aria2c
+            aria2c --header="Authorization: Bearer $HF_TOKEN" --continue=true --split=16 --max-connection-per-server=16 --min-split-size=1M --max-concurrent-downloads=1 --file-allocation=falloc --console-log-level=error --summary-interval=0 --dir="$modelFullPath" --out="$modelFile" "$1"
+        fi
+        return 0
+    fi
+
+    # Model from CivitAI
+    if [[ $1 == *"civitai.com"* ]]; then
+
+        cecho green "\nStarting download:"
+        cecho green "From: CivitAI"
+        cecho green "To:   $outputFolder\n"
+
+        # Form the url with token
+        modelUrl="$1&token=$CIVITAI_API_KEY"
+        # Download the model using aria2c
+        aria2c --continue=true --split=16 --max-connection-per-server=16 --min-split-size=1M --max-concurrent-downloads=1 --file-allocation=falloc --console-log-level=error --summary-interval=0 --dir="$outputFolder" "$modelUrl"
+        return 0
+    fi
+
+    # If the URL is not recognized, show an error message
+    cecho red "\nError! URL not recognized! Make sure you enter a complete URL (https://...)"
+    return 1
+}
+
+
 export -f cecho
 export -f fetch_url
+
 
 path-add /home/user/progs/system
 path-add /home/user/.local/bin
