@@ -168,16 +168,16 @@ function mb() {
     mamba deactivate
     mamba activate base
     echo -e "Using:\n"
-    echo -e "Python: $(which -p python)"
-    echo -e "Pip: $(which -p pip)\n"
+    echo -e "Python: $(which python)"
+    echo -e "Pip: $(which pip)\n"
     echo -e "$PTCLR_CLEAR"
   elif [ "$1" = "d" ]; then
     echo -e "\n${PTCLR_BG_GREEN}Deactivating current environment (${CONDA_DEFAULT_ENV})...${PTCLR_CLEAR}\n"
     echo -e "$PTCLR_FG_GREEN"
     mamba deactivate
     echo -e "Using:\n"
-    echo -e "Python3: $(which -p python3)"
-    echo -e "Pip: $(which -p pip)\n"
+    echo -e "Python3: $(which python3)"
+    echo -e "Pip: $(which pip)\n"
     echo -e "$PTCLR_CLEAR"
   elif [ "$1" = "e" ]; then
     echo -e "\n${PTCLR_BG_YELLOW}Conda environments list:${PTCLR_CLEAR}\n"
@@ -199,8 +199,8 @@ function mb() {
      echo -e "$PTCLR_FG_GREEN"
      mamba activate "$1"
      echo -e "Using:\n"
-     echo -e "Python: $(which -p python)"
-     echo -e "Pip: $(which -p pip)\n"
+     echo -e "Python: $(which python)"
+     echo -e "Pip: $(which pip)\n"
      echo -e "$PTCLR_CLEAR"
    fi
 }
@@ -270,8 +270,8 @@ function getaimodel {
 
     # Check if at least the model-url argument is given
     if [[ $# -lt 1 ]]; then
-        cecho red "\nError! No download URL specified!\n"
-        cecho red "Usage: getaimodel <model-complete-url> [target-code/dir]\n"
+        cecho red "\nError! No download URL specified!"
+        cecho red "Usage: getaimodel <model-complete-url> [target-code/dir]"
         cecho red "Target codes:      \n* inc\n* ckpt | lora '-' flux | pdxl | sdxl | sd15"
         return 1
     fi
@@ -356,6 +356,11 @@ function getaimodel {
 export -f cecho
 export -f fetch_url
 
+export COMFYUI_PATH=/home/user/progs/ComfyUI
 
 path-add /home/user/progs/system
 path-add /home/user/.local/bin
+
+if [ -f ~/kleidia.sh ]; then
+    . ~/kleidia.sh
+fi
