@@ -240,7 +240,7 @@ function get-targetfolder {
     targetCode=$1
     # The folder constants
     aiBaseFolder="$COMFYUI_PATH/models"
-    modelFolders=(
+    declare -A modelFolders=(
         ["inc"]="inc"
         ["ckpt-flux"]="checkpoints/Flux"
         ["ckpt-pdxl"]="checkpoints/PDXL"
@@ -290,7 +290,7 @@ function getaimodel {
             # Hopefully a repo download (either 5 or 7 parts, depending on if branch is included)
             modelCreator=${urlParts[3]}
             modelName=${urlParts[4]}
-            modelFullPath="$outputFolder/$modelName\___$modelCreator"
+            modelFullPath="${outputFolder}/${modelName}___${modelCreator}"
             cecho green "\nDownloading whole model repo:"
             cecho green "From: HuggingFace"
             cecho green "Repo: $modelName"
@@ -318,7 +318,7 @@ function getaimodel {
             modelName=${urlParts[4]}
             modelFile=${urlParts[7]}
             # For HuggingFace models, also form the full path with the model name
-            modelFullPath="$outputFolder/$modelName\___$modelCreator"
+            modelFullPath="${outputFolder}/${modelName}___${modelCreator}"
             cecho red "\nDownloading specific model file:"
             cecho red "From: HuggingFace"
             cecho red "File: $modelFile"
