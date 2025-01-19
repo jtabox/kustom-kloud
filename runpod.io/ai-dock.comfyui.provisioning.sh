@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC1091
 ################################################################################################################
 # __HIGHLY PERSONALIZED__ provisioning script for my ComfyUI AI-Dock containers at runpod.io
 # https://raw.githubusercontent.com/jtabox/kustom-kloud/main/runpod.io/ai-dock.comfyui.provisioning.sh
