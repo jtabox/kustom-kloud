@@ -24,6 +24,7 @@ apt-get install -y --no-install-recommends \
     nano \
     ranger \
     rsync \
+    screen \
     unzip \
     zip
 
@@ -60,13 +61,6 @@ apt-get install -y --no-install-recommends \
     nfs-common \
     python3-cmarkgfm \
     zstd
-
-# Python
-# apt-get install -y \
-#     python3 \
-#     python3-dev \
-#     python3-pip \
-#     python3-venv && \
 
 # Some extra packages from other repos
 mkdir -p /etc/apt/keyrings && \

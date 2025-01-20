@@ -13,5 +13,5 @@ touch /root/.hushlogin
 curl -L -o /root/.bash_aliases https://raw.githubusercontent.com/jtabox/kustom-kloud/main/runpod.io/root.bash_aliases.sh
 wget https://raw.githubusercontent.com/jtabox/kustom-kloud/main/common/nano-conf.tgz && \
     tar -xzf nano-conf.tgz -C /root/ && \
-    rm nano-conf.tgz
-
+    rm nano-conf.tgz && \
+    chown -R root:root /root/.nanorc /root/.nano
