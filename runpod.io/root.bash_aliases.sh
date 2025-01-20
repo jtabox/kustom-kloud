@@ -7,7 +7,7 @@
 ## lol prompt
 PS1='\[\e[92;1m\]\A \[\e[94m\]\u $(if [[ $? -eq 0 ]]; then echo -e "\[\e[30;102;1m\]0"; else echo -e "\[\e[97;101;1m\]$?"; fi)\[\e[0m\] \[\e[38;5;202m\]\w \[\e[0m\]'
 
-## aliases
+## Aliases
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
@@ -43,9 +43,9 @@ alias wget-all='wget --random-wait -r -p -e robots=off -U mozilla -o $HOME/wget_
 alias wget='wget -c'
 alias zombies='ps aux | awk '\''{if ($8=="Z") { print $2 }}'\'''
 
-## env vars
+## Env vars
+# Terminal color codes
 export PTCLR_CLEAR="\e[0;0m"
-# Colored letters
 export PTCLR_FG_BLUE="\e[1;34m"
 export PTCLR_FG_CYAN="\e[0;36m"
 export PTCLR_FG_GRAY="\e[1;30m"
@@ -56,7 +56,6 @@ export PTCLR_FG_MAGENTA="\e[1;35m"
 export PTCLR_FG_ORANGE="\e[0;33m"
 export PTCLR_FG_RED="\e[0;31m"
 export PTCLR_FG_YELLOW="\e[1;33m"
-# Colored background
 export PTCLR_BG_BLUE="\e[0;44m"
 export PTCLR_BG_CYAN="\e[0;46m"
 export PTCLR_BG_GRAY="\e[0;40m"
@@ -64,10 +63,20 @@ export PTCLR_BG_GREEN="\e[0;42m"
 export PTCLR_BG_MAGENTA="\e[0;45m"
 export PTCLR_BG_RED="\e[0;41m"
 export PTCLR_BG_YELLOW="\e[0;43m"
-# comfyui path
-export COMFYUI_PATH=/workspace/ComfyUI
 
-## functions
+# Various
+export COMFYUI_PATH=/workspace/ComfyUI
+export PYTHONUNBUFFERED=1
+export DEBIAN_FRONTEND=noninteractive
+export TZ='Europe/Berlin'
+export PIP_CACHE_DIR=/workspace/.cache/pip
+export PIP_NO_CACHE_DIR=1
+export PIP_DISABLE_PIP_VERSION_CHECK=1
+export PIP_ROOT_USER_ACTION=ignore
+export UV_CACHE_DIR=/workspace/.cache/uv
+export UV_NO_CACHE=1
+
+## Functions
 cecho() {
     # Makes printing colored messages easier. 1st arg: see below, rest is the message
     if [ "$#" -eq 1 ]; then
@@ -146,7 +155,8 @@ getaimodel() {
     if [[ $# -lt 1 ]]; then
         cecho red "\nError! No download URL specified!"
         cecho red "Usage: getaimodel <model-complete-url> [target-code/dir]"
-        cecho red "Target codes:\n* inc\n* (ckpt | lora)-(flux | pdxl | sdxl | sd15)"
+        cecho red "Target codes:\n* inc clip ckpt lora"
+        cecho red "If no target code or dir specified, the current dir is used"
         return 1
     fi
 
@@ -158,15 +168,10 @@ getaimodel() {
     fi
     aiBaseFolder="$COMFYUI_PATH/models"
     declare -A modelFolders=(
-        ["inc"]="_3inc"
-        ["ckpt-flux"]="checkpoints/Flux"
-        ["ckpt-pdxl"]="checkpoints/PDXL"
-        ["ckpt-sd15"]="checkpoints/SD15"
-        ["ckpt-sdxl"]="checkpoints/SDXL"
-        ["lora-flux"]="loras/Flux"
-        ["lora-pdxl"]="loras/PDXL"
-        ["lora-sd15"]="loras/SD15"
-        ["lora-sdxl"]="loras/SDXL"
+        ["inc"]="_inc"
+        ["clip"]="clip"
+        ["ckpt"]="checkpoints"
+        ["lora"]="loras"
     )
     # Check if the target code is a valid key in the modelFolders dictionary
     if [[ -v modelFolders[$targetCode] ]]; then

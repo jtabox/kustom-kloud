@@ -1,0 +1,115 @@
+#!/bin/bash
+# shellcheck disable=SC1091
+# This is run manually after the initial provisioning and downloads/installs the ComyUI nodes below
+# It uses https://github.com/ltdrdata/ComfyUI-Manager/blob/main/docs/en/cm-cli.md for complete install
+
+NODES=(
+    "https://github.com/Acly/comfyui-inpaint-nodes"
+    "https://github.com/adieyal/comfyui-dynamicprompts"
+    "https://github.com/aidenli/ComfyUI_NYJY"
+    "https://github.com/AIrjen/OneButtonPrompt"
+    "https://github.com/AlekPet/ComfyUI_Custom_Nodes_AlekPet"
+    "https://github.com/alexopus/ComfyUI-Image-Saver"
+    "https://github.com/BlenderNeko/ComfyUI_TiledKSampler"
+    "https://github.com/blib-la/blibla-comfyui-extensions"
+    "https://github.com/bvhari/ComfyUI_SUNoise"
+    "https://github.com/chrisgoringe/cg-image-picker"
+    "https://github.com/chrisgoringe/cg-use-everywhere"
+    "https://github.com/city96/ComfyUI-GGUF.git"
+    "https://github.com/city96/ComfyUI_ExtraModels"
+    "https://github.com/comfyanonymous/ComfyUI_TensorRT"
+    "https://github.com/crystian/ComfyUI-Crystools"
+    "https://github.com/cubiq/ComfyUI_essentials"
+    "https://github.com/cubiq/ComfyUI_InstantID"
+    "https://github.com/cubiq/ComfyUI_IPAdapter_plus"
+    "https://github.com/dagthomas/comfyui_dagthomas"
+    "https://github.com/Derfuu/Derfuu_ComfyUI_ModdedNodes"
+    "https://github.com/edenartlab/eden_comfy_pipelines"
+    "https://github.com/evanspearman/ComfyMath"
+    "https://github.com/EvilBT/ComfyUI_SLK_joy_caption_two"
+    "https://github.com/Extraltodeus/sigmas_tools_and_the_golden_scheduler"
+    "https://github.com/Extraltodeus/Vector_Sculptor_ComfyUI"
+    "https://github.com/fairy-root/Flux-Prompt-Generator"
+    "https://github.com/Fannovel16/comfyui_controlnet_aux"
+    "https://github.com/filliptm/ComfyUI_Fill-Nodes"
+    "https://github.com/florestefano1975/comfyui-prompt-composer"
+    "https://github.com/giriss/comfy-image-saver"
+    "https://github.com/gokayfem/ComfyUI_VLM_nodes"
+    "https://github.com/Gourieff/comfyui-reactor"
+    "https://github.com/gseth/ControlAltAI-Nodes"
+    "https://github.com/huchenlei/ComfyUI_densediffusion"
+    "https://github.com/huchenlei/ComfyUI_omost"
+    "https://github.com/idrirap/ComfyUI-Lora-Auto-Trigger-Words"
+    "https://github.com/jags111/efficiency-nodes-comfyui"
+    "https://github.com/jitcoder/lora-info"
+    "https://github.com/Jonseed/ComfyUI-Detail-Daemon"
+    "https://github.com/jtabox/komfy-nodes"
+    "https://github.com/kijai/ComfyUI-DepthAnythingV2"
+    "https://github.com/kijai/ComfyUI-Florence2"
+    "https://github.com/kijai/ComfyUI-KJNodes"
+    "https://github.com/kijai/ComfyUI-LivePortraitKJ"
+    "https://github.com/kijai/ComfyUI-segment-anything-2"
+    "https://github.com/kijai/ComfyUI-SUPIR"
+    "https://github.com/lks-ai/anynode"
+    "https://github.com/lquesada/ComfyUI-Inpaint-CropAndStitch"
+    "https://github.com/ltdrdata/ComfyUI-Impact-Pack"
+    "https://github.com/ltdrdata/ComfyUI-Impact-Subpack"
+    "https://github.com/ltdrdata/ComfyUI-Inspire-Pack"
+    "https://github.com/ltdrdata/ComfyUI-Workflow-Component"
+    "https://github.com/lucafoscili/comfyui-lf"
+    "https://github.com/marduk191/ComfyUI-Fluxpromptenhancer"
+    "https://github.com/markuryy/ComfyUI-Flux-Prompt-Saver"
+    "https://github.com/mcmonkeyprojects/sd-dynamic-thresholding"
+    "https://github.com/melMass/comfy_mtb"
+    "https://github.com/miaoshouai/ComfyUI-Miaoshouai-Tagger"
+    "https://github.com/MushroomFleet/DJZ-Nodes"
+    "https://github.com/nkchocoai/ComfyUI-SaveImageWithMetaData"
+    "https://github.com/nullquant/ComfyUI-BrushNet"
+    "https://github.com/pikenrover/ComfyUI_PRNodes"
+    "https://github.com/PowerHouseMan/ComfyUI-AdvancedLivePortrait"
+    "https://github.com/pydn/ComfyUI-to-Python-Extension"
+    "https://github.com/pythongosssss/ComfyUI-Custom-Scripts.git"
+    "https://github.com/receyuki/comfyui-prompt-reader-node"
+    "https://github.com/replicate/comfyui-replicate"
+    "https://github.com/rgthree/rgthree-comfy"
+    "https://github.com/SeargeDP/ComfyUI_Searge_LLM"
+    "https://github.com/SeargeDP/SeargeSDXL"
+    "https://github.com/silveroxides/ComfyUI_bnb_nf4_fp4_Loaders"
+    "https://github.com/sipherxyz/comfyui-art-venture"
+    "https://github.com/Smirnov75/ComfyUI-mxToolkit"
+    "https://github.com/space-nuko/ComfyUI-OpenPose-Editor"
+    "https://github.com/space-nuko/nui-suite"
+    "https://github.com/ssitu/ComfyUI_UltimateSDUpscale"
+    "https://github.com/Suzie1/ComfyUI_Comfyroll_CustomNodes.git"
+    "https://github.com/tritant/ComfyUI_CreaPrompt"
+    "https://github.com/twri/sdxl_prompt_styler"
+    "https://github.com/ty0x2333/ComfyUI-Dev-Utils"
+    "https://github.com/un-seen/comfyui-tensorops"
+    "https://github.com/WASasquatch/was-node-suite-comfyui"
+    "https://github.com/XLabs-AI/x-flux-comfyui"
+    "https://github.com/yhayano-ponotech/ComfyUI-Fal-API-Flux"
+    "https://github.com/yolain/ComfyUI-Easy-Use"
+    "https://github.com/yuvraj108c/ComfyUI-Depth-Anything-Tensorrt"
+    "https://github.com/yuvraj108c/ComfyUI-Dwpose-Tensorrt"
+    "https://github.com/yuvraj108c/ComfyUI-Upscaler-Tensorrt"
+    "https://github.com/yuvraj108c/ComfyUI-YoloNasPose-Tensorrt"
+)
+
+# comfyui venv
+source /opt/ai-dock/bin/venv-set.sh comfyui
+
+# COMFYUI_VENV /opt/environments/python/comfyui
+# COMFYUI_VENV_PIP /opt/environments/python/comfyui/bin/pip
+# COMFYUI_VENV_PYTHON /opt/environments/python/comfyui/bin/python
+
+# python cm-cli.py install node_dir1 node_dir2 ...
+
+
+install_string=""
+for repo in "${NODES[@]}"; do
+    install_string="${repo##*/} ${install_string}"
+done
+
+$COMFYUI_VENV_PYTHON "${COMFYUI_PATH}/custom_nodes/ComfyUI-Manager/cm-cli.py" install "${install_string}"
+
+cecho green "::::: Finished installing the nodes :::::"

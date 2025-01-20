@@ -1,0 +1,38 @@
+# ~/.screenrc
+
+# Disable startup message
+startup_message off
+
+# Increase scrollback buffer size
+defscrollback 10000
+term screen-256color
+windowlist -b
+
+# Enable mouse support for scrolling
+#mousetrack off  # mousetrack on prevents scrollback
+termcapinfo xterm* ti@:te@
+
+# Enable hardstatus line
+hardstatus alwaysfirstline "%{= kw}: %S :: %t [%n] :"
+
+# Display caption with window information
+caption always "%{= kw}%-w%{= kG}%n %t%{-}%+w"
+
+# Automatically set window title
+shelltitle "$ |bash"
+
+# Custom key bindings
+#bindkey ^k kill  # Bind Ctrl-k to kill the current window
+
+# Auto-detach on hangup
+autodetach on
+
+# Bell notification
+vbell on
+vbell_msg "Bell in window %n (%t)"
+
+# Customize log file names
+logfile /home/user/docs/screenlogs/%S-%n-%t.log
+
+# Enable logging for all windows
+deflog off
