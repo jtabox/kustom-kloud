@@ -1,0 +1,1 @@
+Just stupid customization files I use when spinning up cloud GPUs, with some settings and other personalized stuff. Not gonna work for anyone else probably, but feel free to look in this heap of garbage, maybe you find something useful or whatever. Something something one man's treasure something.
