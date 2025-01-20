@@ -308,7 +308,7 @@ export -f getaimodel
 # add some paths
 path-add /root/.local/bin
 
-# source keyfile
-if [ -f ~/.kleidia ]; then
-    . ~/.kleidia
-fi
+# source keyfile (must be copied with scp from remote - not necessary with runpod, using secrets instead)
+# if [ -f ~/.kleidia ]; then
+#     . ~/.kleidia
+# fi

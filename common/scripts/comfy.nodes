@@ -1,9 +1,8 @@
 #!/bin/bash
-# shellcheck disable=SC1091
-# This is run manually after the initial provisioning and downloads/installs the ComyUI nodes below
-# It uses https://github.com/ltdrdata/ComfyUI-Manager/blob/main/docs/en/cm-cli.md for complete install
 
-NODES=(
+# ComfyUI Nodes list - is imported for installation
+
+COMFY_NODES=(
     "https://github.com/Acly/comfyui-inpaint-nodes"
     "https://github.com/adieyal/comfyui-dynamicprompts"
     "https://github.com/aidenli/ComfyUI_NYJY"
@@ -43,7 +42,6 @@ NODES=(
     "https://github.com/jags111/efficiency-nodes-comfyui"
     "https://github.com/jitcoder/lora-info"
     "https://github.com/Jonseed/ComfyUI-Detail-Daemon"
-    "https://github.com/jtabox/komfy-nodes"
     "https://github.com/kijai/ComfyUI-DepthAnythingV2"
     "https://github.com/kijai/ComfyUI-Florence2"
     "https://github.com/kijai/ComfyUI-KJNodes"
@@ -94,22 +92,3 @@ NODES=(
     "https://github.com/yuvraj108c/ComfyUI-Upscaler-Tensorrt"
     "https://github.com/yuvraj108c/ComfyUI-YoloNasPose-Tensorrt"
 )
-
-# comfyui venv
-source /opt/ai-dock/bin/venv-set.sh comfyui
-
-# COMFYUI_VENV /opt/environments/python/comfyui
-# COMFYUI_VENV_PIP /opt/environments/python/comfyui/bin/pip
-# COMFYUI_VENV_PYTHON /opt/environments/python/comfyui/bin/python
-
-# python cm-cli.py install node_dir1 node_dir2 ...
-
-
-install_string=""
-for repo in "${NODES[@]}"; do
-    install_string="${repo##*/} ${install_string}"
-done
-
-$COMFYUI_VENV_PYTHON "${COMFYUI_PATH}/custom_nodes/ComfyUI-Manager/cm-cli.py" install "${install_string}"
-
-cecho green "::::: Finished installing the nodes :::::"

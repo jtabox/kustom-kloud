@@ -9,6 +9,7 @@ set -o pipefail # Exit on pipe error
 export DEBIAN_FRONTEND=noninteractive
 
 # Update, upgrade, install packages and clean up
+echo "::::: Starting package installs :::::"
 # Some basic packages
 apt-get update -y &&
 apt-get upgrade -y &&
@@ -99,4 +100,4 @@ apt-get autoremove -y && \
 apt-get clean && \
 rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-echo "Package installs done."
+echo "::::: Finished package installs :::::"

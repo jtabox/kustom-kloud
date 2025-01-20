@@ -1,0 +1,74 @@
+#!/bin/bash
+
+# ComfyUI Models lists file - is imported for installation
+
+COMFY_MODELS_CKPTS=(
+    "https://huggingface.co/Comfy-Org/flux1-dev/resolve/main/flux1-dev-fp8.safetensors"
+    "https://huggingface.co/city96/FLUX.1-dev-gguf/resolve/main/flux1-dev-Q8_0.gguf"
+    "https://huggingface.co/city96/FLUX.1-dev-gguf/resolve/main/flux1-dev-Q6_K.gguf"
+    # sapian f
+    "https://civitai.com/api/download/models/963454?type=Model&format=GGUF&size=pruned&fp=fp8"
+    # pulsar
+    "https://civitai.com/api/download/models/990314?type=Model&format=SafeTensor&size=pruned&fp=fp8"
+)
+
+COMFY_MODELS_LORAS=(
+    # xpenis uncut flux
+    "https://civitai.com/api/download/models/961155?type=Model&format=SafeTensor"
+    # xuncut flux
+    "https://civitai.com/api/download/models/840129?type=Model&format=SafeTensor"
+    # sniffies
+    "https://civitai.com/api/download/models/1056339?type=Model&format=SafeTensor"
+    # xhirsute
+    "https://civitai.com/api/download/models/985202?type=Model&format=SafeTensor"
+    # man hole - butt
+    "https://civitai.com/api/download/models/1066361?type=Model&format=SafeTensor"
+    # project men
+    "https://civitai.com/api/download/models/1058927?type=Model&format=SafeTensor"
+    # androflux
+    "https://civitai.com/api/download/models/805890?type=Model&format=SafeTensor"
+)
+
+COMFY_MODELS_CLIP=(
+    # zeroint's clips
+    "https://huggingface.co/zer0int/CLIP-GmP-ViT-L-14/resolve/main/ViT-L-14-BEST-smooth-GmP-TE-only-HF-format.safetensors"
+    "https://huggingface.co/zer0int/CLIP-GmP-ViT-L-14/resolve/main/ViT-L-14-TEXT-detail-improved-hiT-GmP-TE-only-HF.safetensors"
+    "https://huggingface.co/zer0int/CLIP-GmP-ViT-L-14/resolve/main/ViT-L-14-GmP-ft-TE-only-HF-format.safetensors"
+    # t5xxl at fp8
+    "https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp8_e4m3fn.safetensors"
+    # original clip-l
+    "https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors"
+    # t5xxl as gguf
+    "https://huggingface.co/city96/t5-v1_1-xxl-encoder-gguf/resolve/main/t5-v1_1-xxl-encoder-Q8_0.gguf"
+    "https://huggingface.co/city96/t5-v1_1-xxl-encoder-gguf/resolve/main/t5-v1_1-xxl-encoder-Q6_K.gguf"
+)
+
+COMFY_MODELS_OTHER=(
+    # vae
+    "https://huggingface.co/black-forest-labs/FLUX.1-dev/resolve/main/ae.safetensors"
+    # unet only
+    "https://huggingface.co/Kijai/flux-fp8/resolve/main/flux1-dev-fp8.safetensors"
+)
+
+SECONDARY_MODELS_CKPTS=(
+    # flux-realistic
+    "https://civitai.com/api/download/models/963489?type=Model&format=GGUF&size=pruned&fp=fp8"
+    # demoncore checkpoint
+    "https://civitai.com/api/download/models/1048219?type=Model&format=SafeTensor&size=full&fp=fp8"
+    # flux uncensored
+    "https://civitai.com/api/download/models/1249447?type=Model&format=SafeTensor&size=full&fp=fp8"
+    # banana diffusion - nf4
+    "https://civitai.com/api/download/models/744068?type=Model&format=SafeTensor&size=full&fp=nf4"
+    # fp8 scaled - put in diffusion models
+    "https://huggingface.co/comfyanonymous/flux_dev_scaled_fp8_test/resolve/main/flux_dev_fp8_scaled_diffusion_model.safetensors"
+    # q4_1 gguf
+    "https://huggingface.co/city96/FLUX.1-dev-gguf/resolve/main/flux1-dev-Q4_1.gguf"
+)
+
+SECONDARY_MODELS_CLIP=(
+    # fp32 versions
+    "https://civitai.com/api/download/models/1172273?type=Model&format=SafeTensor&size=pruned&fp=fp32"
+    "https://civitai.com/api/download/models/1176578?type=Model&format=SafeTensor&size=pruned&fp=fp32"
+    # scaled clip
+    "https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp8_e4m3fn_scaled.safetensors"
+)
