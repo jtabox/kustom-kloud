@@ -76,6 +76,14 @@ export PIP_ROOT_USER_ACTION=ignore
 export UV_CACHE_DIR=/workspace/.cache/uv
 export UV_NO_CACHE=1
 
+# Also need to re-export the secrets, because runpod names them weirdly
+export CIVITAI_API_KEY=$RUNPOD_SECRET_CAK
+export FAL_KEY=$RUNPOD_SECRET_FK
+export HF_TOKEN=$RUNPOD_SECRET_HT
+export NGROK_AUTH_TOKEN=$RUNPOD_SECRET_NAT
+export OPENROUTER_API_KEY=$RUNPOD_SECRET_OAK
+export REPLICATE_API_TOKEN=$RUNPOD_SECRET_RAT
+
 ## Functions
 cecho() {
     # Makes printing colored messages easier. 1st arg: see below, rest is the message
