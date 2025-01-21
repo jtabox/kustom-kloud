@@ -1,6 +1,5 @@
-#!/bin/bash
-
 # ComfyUI Nodes list - is imported for installation
+# shellcheck disable=all
 
 COMFY_NODES=(
     "https://github.com/Acly/comfyui-inpaint-nodes"
@@ -61,7 +60,6 @@ COMFY_NODES=(
     "https://github.com/melMass/comfy_mtb"
     "https://github.com/miaoshouai/ComfyUI-Miaoshouai-Tagger"
     "https://github.com/MushroomFleet/DJZ-Nodes"
-    "https://github.com/nkchocoai/ComfyUI-SaveImageWithMetaData"
     "https://github.com/nullquant/ComfyUI-BrushNet"
     "https://github.com/pikenrover/ComfyUI_PRNodes"
     "https://github.com/PowerHouseMan/ComfyUI-AdvancedLivePortrait"
@@ -87,8 +85,4 @@ COMFY_NODES=(
     "https://github.com/XLabs-AI/x-flux-comfyui"
     "https://github.com/yhayano-ponotech/ComfyUI-Fal-API-Flux"
     "https://github.com/yolain/ComfyUI-Easy-Use"
-    "https://github.com/yuvraj108c/ComfyUI-Depth-Anything-Tensorrt"
-    "https://github.com/yuvraj108c/ComfyUI-Dwpose-Tensorrt"
-    "https://github.com/yuvraj108c/ComfyUI-Upscaler-Tensorrt"
-    "https://github.com/yuvraj108c/ComfyUI-YoloNasPose-Tensorrt"
 )

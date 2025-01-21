@@ -1,6 +1,11 @@
 #!/bin/bash
-# A series of scripts that install packages, ComfyUI, configure and download files.
+# shellcheck disable=SC1091
+# A series of scripts that install packages, ComfyUI, configure and download files and start up apps.
 # 0: Package installs - root version (no sudo) for runpod.io
+# Use the commands below to download scripts 0+1, the rest will be fetched by the scripts.
+# wget https://raw.githubusercontent.com/jtabox/kustom-kloud/main/runpod.io/0.package-installs.sh && chmod +x 0.package-installs.sh && \
+# wget https://raw.githubusercontent.com/jtabox/kustom-kloud/main/runpod.io/1.files-folders.sh && chmod +x 1.files-folders.sh && \
+# ./0.package-installs.sh && ./1.files-folders.sh
 
 set -e          # Exit on error
 set -u          # Exit on using unset variable
@@ -9,7 +14,7 @@ set -o pipefail # Exit on pipe error
 export DEBIAN_FRONTEND=noninteractive
 
 # Update, upgrade, install packages and clean up
-echo "::::: Starting package installs :::::"
+echo -e "\n::::: Starting package installs :::::\n\n"
 # Some basic packages
 apt-get update -y &&
 apt-get upgrade -y &&
@@ -100,4 +105,9 @@ apt-get autoremove -y && \
 apt-get clean && \
 rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-echo "::::: Finished package installs :::::"
+wget -q https://raw.githubusercontent.com/jtabox/kustom-kloud/main/runpod.io/1.files-folders.sh && \
+    chown root:root 1.files-folders.sh && \
+    chmod +x 1.files-folders.sh
+
+echo -e "\n\n::::: Finished package installs :::::"
+echo -e "::::: Next: run './1.files-folders.sh' :::::\n"

@@ -299,16 +299,74 @@ whereis() {
     fi
 }
 
+get_multiple_models() {
+    # Downloads multiple model files from a specifically formatted file (see comfy.models)
+    if [ -z "$1" ]; then
+        cecho red "Usage: download_multiple <file_with_urls>"
+        cecho red "Downloads multiple files from a specifically formatted file with URLs:"
+        cecho red "A shell script that sets the COMFY_MODELS_CKPTS, COMFY_MODELS_LORAS, COMFY_MODELS_CLIP, COMFY_MODELS_OTHER arrays with the URLs\nwhich are then downloaded in ComfyUI's respective model folders"
+        return 1
+    elif [ ! -f "$1" ]; then
+        cecho red "\nError! Could not find a file to read at $1 !"
+        return 1
+    else
+        source "$1"
+    fi
+    len_ckpts=${#COMFY_MODELS_CKPTS[@]}
+    len_loras=${#COMFY_MODELS_LORAS[@]}
+    len_clip=${#COMFY_MODELS_CLIP[@]}
+    len_other=${#COMFY_MODELS_OTHER[@]}
+
+    cecho green "Imported list with:\n"
+    cecho green "${len_ckpts} checkpoints"
+    cecho green "${len_loras} loras"
+    cecho green "${len_clip} text encoders"
+    cecho green "${len_other} other models"
+
+    cecho green "Fetching checkpoints ..."
+    ckpt_counter=1
+    for file_url in "${COMFY_MODELS_CKPTS[@]}"; do
+        cecho orange "$ckpt_counter / $len_ckpts ..."
+        getaimodel "$file_url" ckpt
+        ((ckpt_counter++))
+    done
+
+    # also link the files inside the comfyui checkpoints folder to unet folder
+    for ckpt_file in "$COMFYUI_PATH"/models/checkpoints/*; do
+        ln -f "$ckpt_file" "$COMFYUI_PATH"/models/unet/
+    done
+
+    cecho green "Fetching loras ..."
+    loras_counter=1
+    for file_url in "${COMFY_MODELS_LORAS[@]}"; do
+        cecho orange "$loras_counter / $len_loras ..."
+        getaimodel "$file_url" lora
+        ((loras_counter++))
+    done
+
+    cecho green "Fetching text encoders ..."
+    clip_counter=1
+    for file_url in "${COMFY_MODELS_CLIP[@]}"; do
+        cecho orange "$clip_counter / $len_clip ..."
+        getaimodel "$file_url" clip
+        ((clip_counter++))
+    done
+
+    cecho green "Fetching other models, move them from $COMFYUI_PATH/models/_inc ..."
+    other_counter=1
+    for file_url in "${COMFY_MODELS_OTHER[@]}"; do
+        cecho orange "$other_counter / $len_other ..."
+        getaimodel "$file_url" inc
+        ((other_counter++))
+    done
+}
+
 ## misc
 # those two are used in other scripts too
 export -f cecho
 export -f fetch_url
 export -f getaimodel
+export -f get_multiple_models
 
 # add some paths
 path-add /root/.local/bin
-
-# source keyfile (must be copied with scp from remote - not necessary with runpod, using secrets instead)
-# if [ -f ~/.kleidia ]; then
-#     . ~/.kleidia
-# fi

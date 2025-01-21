@@ -1,12 +1,14 @@
 #!/bin/bash
-# A series of scripts that install packages, ComfyUI, configure and download files.
+# shellcheck disable=SC1091
+# A series of scripts that install packages, ComfyUI, configure and download files and start up apps.
 # 2: ComfyUI installation - root version (no sudo) for runpod.io
+# wget https://raw.githubusercontent.com/jtabox/kustom-kloud/main/runpod.io/2.comfy-install.sh && chmod +x 2.comfy-install.sh
 
 set -e          # Exit on error
 set -u          # Exit on using unset variable
 set -o pipefail # Exit on pipe error
 
-cecho cyanb "Starting ComfyUI installation ..."
+cecho cyan "\n::::: Starting ComfyUI installation  :::::\n\n"
 
 # Check if /workspace is available
 if [ ! -d "/workspace" ]; then
@@ -36,9 +38,16 @@ pip install -r /workspace/ComfyUI/requirements.txt && \
 pip install -r /workspace/ComfyUI/custom_nodes/ComfyUI-Manager/requirements.txt && \
 pip install comfy-cli
 
+mkdir -p "$COMFYUI_PATH"/user/default/ComfyUI-Manager
+mv /root/comfy.settings.json /root/comfy.templates.json "$COMFYUI_PATH"/user/default
+cp /root/mgr.config.ini "$COMFYUI_PATH"/custom_nodes/ComfyUI-Manager
+mv /root/mgr.config.ini "$COMFYUI_PATH"/user/default/ComfyUI-Manager
+
 if ! comfy set-default "$COMFYUI_PATH"; then
-    cecho red "Failed to set the default ComfyUI path via comfy command!\nCheck if everything is working manually. Exiting..."
+    cecho red "\n\n::::: Failed to set the default ComfyUI path via comfy command!\nCheck if everything is working manually. Exiting :::::"
+    cecho yellow "::::: Next: run './3.comfy-nodes.sh' to install ComfyUI nodes :::::\n"
     exit 1
 else
-    cecho green "::::: ComfyUI installation completed successfully. :::::\n::::: Default ComfyUI path set successfully as $COMFYUI_PATH :::::"
+    cecho green "\n\n::::: ComfyUI installation completed successfully. :::::\n::::: Default ComfyUI path set successfully as $COMFYUI_PATH :::::"
+    cecho yellow "::::: Next: run './3.comfy-nodes.sh' to install ComfyUI nodes :::::\n"
 fi
