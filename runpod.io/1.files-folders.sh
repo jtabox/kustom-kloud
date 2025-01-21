@@ -20,7 +20,7 @@ get_config() {
     filename=$(basename "$1")
     chown root:root "$filename" || exit 1
     #if a second arg is passed ("exec"), make the file executable
-    if [ "$2" = "exec" ]; then
+    if [ "$#" -ge 2 ]; then
         chmod +x "$filename"
     fi
 }
