@@ -1,6 +1,5 @@
 #!/bin/bash
 ## A customized .bash_aliases I use in cloud instances - root version (no sudo)
-# wget -q -O ~/.bash_aliases https://raw.githubusercontent.com/jtabox/kustom-kloud/main/runpod.io/root.bash_aliases.sh
 
 # shellcheck disable=all
 
@@ -138,7 +137,7 @@ check-port() {
     cecho green '\nDone.'
 }
 
-fetch_url() {
+aria_get() {
     # Uses aria2c to download a file from a URL
     if [ $# -eq 0 ]; then
         cecho red "\nUses aria2c to download a file from a URL\nUsage: fetch_url <url> [target_dir (current dir if not specified)]"
@@ -153,12 +152,7 @@ fetch_url() {
 }
 
 getaimodel() {
-    # Downloader for AI models that uses appropriate API_KEYs and creates and saves in appropriate folder names
-    # Check if the 2 needed environment variables are set
-    if [[ -z $HF_TOKEN || -z $CIVITAI_API_KEY ]]; then
-        cecho red "Error! HF_TOKEN and/or CIVITAI_API_KEY environment variable not set!"
-        return 1
-    fi
+    # Downloader for AI models - uses appropriate API_KEYs and creates and saves in appropriate folder names
     # Check if at least the model-url argument is given
     if [[ $# -lt 1 ]]; then
         cecho red "\nError! No download URL specified!"
@@ -190,6 +184,10 @@ getaimodel() {
 
     # Model is from HuggingFace
     if [[ $1 == *"huggingface.co"* || $1 == *"hf.co"* ]]; then
+        if [[ -z $HF_TOKEN ]]; then
+            cecho red "Error! HuggingFace download URL detected, but HF_TOKEN environment variable is not set!"
+            return 1
+        fi
         # Figure out if it's repo or file download, from the amount of url parts
         IFS='/' read -r -a urlParts <<<"$1"
         if [[ ${#urlParts[@]} -le 7 ]]; then
@@ -205,7 +203,7 @@ getaimodel() {
             if [[ -d $modelFullPath && $(ls -A "$modelFullPath") ]]; then
                 # There already exists a non-empty folder with that name, git clone will complain
                 cecho orange "Warning! A non-empty folder with the same name exists already:\n'$modelFullPath'"
-                cecho orange "The folder and its contents will be deleted if you proceed so that git clone doesn't complain. Make sure you've backed it up as necessary before continuing here.\nProceed? - [y]/n :: "
+                cecho orange "The folder and its contents will be DELETED for git clone to work.\nProceed? - [y]/n :: "
                 read -r userResponse
                 if [[ ${userResponse,,} == 'n' ]]; then
                     cecho red "\nExiting..."
@@ -245,6 +243,10 @@ getaimodel() {
 
     # Model is from CivitAI
     if [[ $1 == *"civitai.com"* ]]; then
+        if [[ -z $CIVITAI_API_KEY ]]; then
+            cecho red "Error! CivitAI download URL detected, but CIVITAI_API_KEY environment variable is not set!"
+            return 1
+        fi
         cecho green "\nStarting download:"
         cecho green "From: CivitAI"
         cecho green "To:   $outputFolder\n"
@@ -289,7 +291,7 @@ path-remove() {
 
 subst-in-file() {
     # Substitutes a string in a file
-    [ "$#" -ne 3 ] && cecho red "\nSubstitutes a string in a file\nUsage: subst-in-file <in file> <find what> <replace with>" && return
+    [ "$#" -ne 3 ] && cecho red "\nSubstitutes a string in a file\nUsage: subst-in-file <the file> <find what> <replace with>" && return 1
     perl -i.orig -pe 's/'"$2"'/'"$3"'/g' "$1"
 }
 
@@ -302,7 +304,7 @@ whereis() {
         cecho yellow "* which:"
         which "$1"
         cecho yellow "* find:"
-        find "$(pwd)" -xdev -name "*$1*"
+        find / -xdev -name "*$1*"
         cecho green "\nDone."
     fi
 }
@@ -341,7 +343,7 @@ get_multiple_models() {
 
     # also link the files inside the comfyui checkpoints folder to unet folder
     for ckpt_file in "$COMFYUI_PATH"/models/checkpoints/*; do
-        ln -f "$ckpt_file" "$COMFYUI_PATH"/models/unet/
+        ln -s -f "$ckpt_file" "$COMFYUI_PATH"/models/unet/
     done
 
     cecho green "Fetching loras ..."
@@ -360,13 +362,20 @@ get_multiple_models() {
         ((clip_counter++))
     done
 
-    cecho green "Fetching other models, move them from $COMFYUI_PATH/models/_inc ..."
+    cecho green "Fetching other models in $COMFYUI_PATH/models/_inc, move them manually to appropriate folder ..."
     other_counter=1
     for file_url in "${COMFY_MODELS_OTHER[@]}"; do
         cecho orange "$other_counter / $len_other ..."
         getaimodel "$file_url" inc
         ((other_counter++))
     done
+}
+
+run_comfy() {
+    cd /workspace/ComfyUI || return 1
+    git pull
+    comfy update all
+    python main.py
 }
 
 ## misc
