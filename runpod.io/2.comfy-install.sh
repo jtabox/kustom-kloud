@@ -19,15 +19,14 @@ fi
 cd /workspace
 
 if [ -d "/workspace/ComfyUI" ]; then
-    cecho yellow "A ComfyUI folder exists already! Will only pull changes.\nRemove the folder and re-run this if you want to re-clone and make a fresh install."
-    cd ComfyUI && git pull
-    exit 0
+    cecho yellow "A ComfyUI folder exists already, will not clone."
 else
-    git clone https://github.com/comfyanonymous/ComfyUI.git
-    cecho green "ComfyUI cloned successfully"
+    git clone https://github.com/comfyanonymous/ComfyUI.git && \
+    cd /workspace/ComfyUI/custom_nodes && \
+    git clone https://github.com/ltdrdata/ComfyUI-Manager.git && \
+    cecho green "ComfyUI and Manager cloned successfully"
 fi
 
-cd /workspace/ComfyUI/custom_nodes && git clone https://github.com/ltdrdata/ComfyUI-Manager.git
 
 # Moving python3.11 to /workspace/usrlocallib to save space in the main container
 # if the storage already has a directory, remove it (it means its a new instance)
@@ -49,10 +48,15 @@ pip install -r /workspace/ComfyUI/requirements.txt && \
 pip install -r /workspace/ComfyUI/custom_nodes/ComfyUI-Manager/requirements.txt && \
 pip install comfy-cli
 
-mkdir -p "$COMFYUI_PATH"/user/default/ComfyUI-Manager
-mv /root/comfy.settings.json /root/comfy.templates.json "$COMFYUI_PATH"/user/default
-cp /root/mgr.config.ini "$COMFYUI_PATH"/custom_nodes/ComfyUI-Manager/config.ini
-mv /root/mgr.config.ini "$COMFYUI_PATH"/user/default/ComfyUI-Manager/config.ini
+if [ -d "/workspace/ComfyUI" ]; then
+    # those exist already, no need to overwrite
+    rm /root/comfy.settings.json /root/comfy.templates.json /root/mgr.config.ini
+else
+    mkdir -p "$COMFYUI_PATH"/user/default/ComfyUI-Manager
+    mv /root/comfy.settings.json /root/comfy.templates.json "$COMFYUI_PATH"/user/default
+    cp /root/mgr.config.ini "$COMFYUI_PATH"/custom_nodes/ComfyUI-Manager/config.ini
+    mv /root/mgr.config.ini "$COMFYUI_PATH"/user/default/ComfyUI-Manager/config.ini
+fi
 
 mkdir -p "/root/.config/comfy-cli"
 
