@@ -29,6 +29,17 @@ fi
 
 cd /workspace/ComfyUI/custom_nodes && git clone https://github.com/ltdrdata/ComfyUI-Manager.git
 
+# Moving python3.11 to /workspace/usrlocallib to save space in the main container
+# if the storage already has a directory, remove it (it means its a new instance)
+cecho orange "Moving python3.11 installation to /workspace ..."
+if [ -d "/workspace/usrlocallib" ]; then
+    rm -rf /workspace/usrlocallib
+fi
+mkdir -p /workspace/usrlocallib/python3.11
+chmod 755 /workspace/usrlocallib
+mv /usr/local/lib/python3.11 /workspace/usrlocallib
+ln -s /workspace/usrlocallib/python3.11 /usr/local/lib/python3.11
+
 # Some extra packages (torch v2.4.1+cu124 is already installed, has to be locked otherwise xformers will install a different version)
 python -m pip install --upgrade pip
 pip install --no-build-isolation flash-attn

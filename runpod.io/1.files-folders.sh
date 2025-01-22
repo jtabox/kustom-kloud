@@ -42,8 +42,6 @@ get_config "common/configs/comfy.screenrc"
 get_config "common/configs/comfy.settings.json"
 get_config "common/configs/comfy.templates.json"
 get_config "common/configs/mgr.config.ini"
-get_config "common/configs/ngrok-config.yml"
-get_config "common/configs/comfy-cli.config.ini"
 
 get_config "runpod.io/2.comfy-install.sh" exec
 get_config "runpod.io/3.init-apps.sh" exec

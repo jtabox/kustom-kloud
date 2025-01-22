@@ -15,6 +15,8 @@ if [ -z "$NGROK_AUTH_TOKEN" ]; then
     exit 1
 fi
 
+mkdir -p /root/.config/ngrok
+
 cat <<EOF > /root/.config/ngrok/ngrok.yml
 version: "3"
 agent:
@@ -55,8 +57,8 @@ if [ ! -f "/root/config.xml" ]; then
     cecho red "Can't find the syncthing.config.xml file! Exiting..."
     exit 1
 else
-    mkdir -p /root/.config/state/syncthing
-    mv /root/config.xml /root/.config/state/syncthing/config.xml
+    mkdir -p /root/.local/state/syncthing
+    mv /root/config.xml /root/.local/state/syncthing/config.xml
     cecho green "Syncthing configuration file moved successfully"
     cecho orange "Press Enter to start the session..."
     read -r

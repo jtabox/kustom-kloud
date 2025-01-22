@@ -2,7 +2,7 @@
 # shellcheck disable=SC1091
 # A series of scripts that install packages, ComfyUI, configure and download files and start up apps.
 # 0: Package installs - root version (no sudo) for runpod.io
-# Use the commands below to download script 0, the rest will be fetched by the scripts.
+# Use the command below to download script 0, the rest will be fetched by the scripts.
 # wget -q https://raw.githubusercontent.com/jtabox/kustom-kloud/main/runpod.io/0.package-installs.sh && chmod +x 0.package-installs.sh && ./0.package-installs.sh
 
 
