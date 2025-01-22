@@ -208,7 +208,6 @@ recent_workspace = $COMFYUI_PATH
 
 EOF
 
-    touch /workspace/_INSTALL_COMPLETE
     cecho green "\n\n:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n::::: ComfyUI & Manager installation completed successfully :::::\n:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n\n"
 
     cecho cyan "\n\n:::::::::::::::::::::::::::::::::::::::::::\n::::: Initializing ngrok & SyncThing  :::::\n:::::::::::::::::::::::::::::::::::::::::::\n\n"
@@ -264,6 +263,7 @@ EOF
         mv /root/config.xml /root/.local/state/syncthing/config.xml
         cecho green "Syncthing configuration file moved successfully"
     fi
+    touch /workspace/_INSTALL_COMPLETE
     cecho orange "\n:: To install the initial node collection from file: 'install_multiple_nodes /root/comfy.nodes'"
     cecho orange ":: To install the initial model collection from file: 'download_multiple_models /root/comfy.models'\n"
 else
