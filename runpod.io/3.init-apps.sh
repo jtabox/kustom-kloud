@@ -43,7 +43,11 @@ tunnels:
 EOF
 
 cecho green "ngrok configuration written successfully"
-cecho orange "For the next step, you need to manually send the SyncThing config file via scp to the root folder before continuing."
+
+# Prepare the scp command using $RUNPOD_TCP_PORT_22 and $RUNPOD_PUBLIC_IP
+scp_command="scp -P $RUNPOD_TCP_PORT_22 -i .ssh/key /path/to/config.xml root@$RUNPOD_PUBLIC_IP:/root/config.xml"
+cecho orange "For the next step, you need to manually send the SyncThing config file via the following command before continuing:"
+cecho orange "$scp_command"
 cecho orange "Press Enter to continue afterwards. If no file is uploaded, the script will exit."
 read -r
 
