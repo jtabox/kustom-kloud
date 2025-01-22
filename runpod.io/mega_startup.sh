@@ -35,7 +35,7 @@ if [ $FIRST_TIME_INSTALL ]; then
     # /root
     mkdir -p /workspace/root
     chmod 755 /workspace/root
-    mv /root /workspace/root
+    mv /root /workspace
     # Python 3.11
     mkdir -p /workspace/usrlocallib/python3.11
     chmod 755 /workspace/usrlocallib

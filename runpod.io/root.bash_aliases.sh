@@ -429,7 +429,7 @@ run_comfy() {
 ## misc
 # those two are used in other scripts too
 export -f cecho
-export -f fetch_url
+export -f aria_get
 export -f getaimodel
 export -f install_multiple_nodes
 export -f download_multiple_models
