@@ -1,5 +1,4 @@
 # ComfyUI Models lists file - is imported for installation
-# shellcheck disable=all
 
 COMFY_MODELS_CKPTS=(
     "https://huggingface.co/Comfy-Org/flux1-dev/resolve/main/flux1-dev-fp8.safetensors"
@@ -34,17 +33,12 @@ COMFY_MODELS_OTHER=(
     "https://huggingface.co/Kijai/flux-fp8/resolve/main/flux1-dev-fp8.safetensors"
 )
 
-SECONDARY_MODELS_CKPTS=(
-    "https://civitai.com/api/download/models/963489?type=Model&format=GGUF&size=pruned&fp=fp8"
-    "https://civitai.com/api/download/models/1048219?type=Model&format=SafeTensor&size=full&fp=fp8"
-    "https://civitai.com/api/download/models/1249447?type=Model&format=SafeTensor&size=full&fp=fp8"
-    "https://civitai.com/api/download/models/744068?type=Model&format=SafeTensor&size=full&fp=nf4"
-    "https://huggingface.co/comfyanonymous/flux_dev_scaled_fp8_test/resolve/main/flux_dev_fp8_scaled_diffusion_model.safetensors"
-    "https://huggingface.co/city96/FLUX.1-dev-gguf/resolve/main/flux1-dev-Q4_1.gguf"
-)
-
-SECONDARY_MODELS_CLIP=(
-    "https://civitai.com/api/download/models/1172273?type=Model&format=SafeTensor&size=pruned&fp=fp32"
-    "https://civitai.com/api/download/models/1176578?type=Model&format=SafeTensor&size=pruned&fp=fp32"
-    "https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp8_e4m3fn_scaled.safetensors"
-)
+# "https://civitai.com/api/download/models/963489?type=Model&format=GGUF&size=pruned&fp=fp8"
+# "https://civitai.com/api/download/models/1048219?type=Model&format=SafeTensor&size=full&fp=fp8"
+# "https://civitai.com/api/download/models/1249447?type=Model&format=SafeTensor&size=full&fp=fp8"
+# "https://civitai.com/api/download/models/744068?type=Model&format=SafeTensor&size=full&fp=nf4"
+# "https://huggingface.co/comfyanonymous/flux_dev_scaled_fp8_test/resolve/main/flux_dev_fp8_scaled_diffusion_model.safetensors"
+# "https://huggingface.co/city96/FLUX.1-dev-gguf/resolve/main/flux1-dev-Q4_1.gguf"
+# "https://civitai.com/api/download/models/1172273?type=Model&format=SafeTensor&size=pruned&fp=fp32"
+# "https://civitai.com/api/download/models/1176578?type=Model&format=SafeTensor&size=pruned&fp=fp32"
+# "https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp8_e4m3fn_scaled.safetensors"

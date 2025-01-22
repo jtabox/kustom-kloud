@@ -1,5 +1,4 @@
 # ComfyUI Nodes list - is imported for installation
-# shellcheck disable=all
 
 COMFY_NODES=(
     "https://github.com/Acly/comfyui-inpaint-nodes"

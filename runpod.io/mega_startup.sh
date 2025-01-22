@@ -6,10 +6,10 @@
 # Runs as root, no sudo required.
 
 # Download manually at first run:
-# wget -q https://raw.githubusercontent.com/jtabox/kustom-kloud/main/runpod.io/startup.sh && chmod +x startup.sh && ./startup.sh
+# wget -q https://raw.githubusercontent.com/jtabox/kustom-kloud/megascript-v2/runpod.io/mega_startup.sh && chmod +x mega_startup.sh && ./mega_startup.sh
 
-# Exit on error, unset variable, pipefail
-set -euo pipefail
+# Exit on error, pipefail
+set -eo pipefail
 
 # Check what exists
 if [ ! -d "/workspace" ]; then
@@ -133,6 +133,17 @@ rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 echo -e "\n\n:::::::::::::::::::::::::::::::::::::\n::::: Finished package installs :::::\n:::::::::::::::::::::::::::::::::::::\n\n"
 
+get_repo_file() {
+    echo -e "\nFetching: $1"
+    wget -q "https://raw.githubusercontent.com/jtabox/kustom-kloud/main/$1" || exit 1
+    filename=$(basename "$1")
+    chown root:root "$filename" || exit 1
+    #if a second arg is passed, make the file executable
+    if [ "$#" -ge 2 ]; then
+        chmod +x "$filename"
+    fi
+}
+
 if [ $FIRST_TIME_INSTALL ]; then
     echo -e "\n\n::::::::::::::::::::::::::::::::::::::::::::\n::::: Starting files and folders setup :::::\n::::::::::::::::::::::::::::::::::::::::::::\n\n"
 
@@ -141,17 +152,6 @@ if [ $FIRST_TIME_INSTALL ]; then
 
     # Fetch some files
     cd /root || exit 1
-
-    get_cfg_file() {
-        echo -e "\nFetching: $1"
-        wget -q "https://raw.githubusercontent.com/jtabox/kustom-kloud/main/$1" || exit 1
-        filename=$(basename "$1")
-        chown root:root "$filename" || exit 1
-        #if a second arg is passed, make the file executable
-        if [ "$#" -ge 2 ]; then
-            chmod +x "$filename"
-        fi
-    }
 
     echo -e "\nFetching: .bash_aliases"
     wget -qO .bash_aliases https://raw.githubusercontent.com/jtabox/kustom-kloud/main/runpod.io/root.bash_aliases.sh && \
@@ -165,15 +165,15 @@ if [ $FIRST_TIME_INSTALL ]; then
         chown -R root:root /root/.nanorc /root/.nano
 
     cecho cyan "\nFetching: comfy download lists"
-    get_cfg_file "common/scripts/comfy.nodes"
-    get_cfg_file "common/scripts/comfy.models"
+    get_repo_file "common/scripts/comfy.nodes"
+    get_repo_file "common/scripts/comfy.models"
 
     cecho cyan "\nFetching: screen and comfy config files"
-    get_cfg_file "common/configs/.screenrc"
-    get_cfg_file "common/configs/comfy.screenrc"
-    get_cfg_file "common/configs/comfy.settings.json"
-    get_cfg_file "common/configs/comfy.templates.json"
-    get_cfg_file "common/configs/mgr.config.ini"
+    get_repo_file "common/configs/.screenrc"
+    get_repo_file "common/configs/comfy.screenrc"
+    get_repo_file "common/configs/comfy.settings.json"
+    get_repo_file "common/configs/comfy.templates.json"
+    get_repo_file "common/configs/mgr.config.ini"
 
     cecho green "\n\n:::::::::::::::::::::::::::::::::::::::::::::::::\n::::: Finished setting up files and folders :::::\n:::::::::::::::::::::::::::::::::::::::::::::::::\n\n"
 
@@ -264,9 +264,14 @@ EOF
         mv /root/config.xml /root/.local/state/syncthing/config.xml
         cecho green "Syncthing configuration file moved successfully"
     fi
+    cecho orange "\n:: To install the initial node collection from file: 'install_multiple_nodes /root/comfy.nodes'"
+    cecho orange ":: To install the initial model collection from file: 'download_multiple_models /root/comfy.models'\n"
 else
     source /root/.bash_aliases
 fi
 
-cecho orange "Press Enter to start the session..."
+cecho green "\n\n::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n::::: Initialization completed. Press Enter to start the session :::::\n::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n\n"
 read -r
+
+# Start the session
+screen -c /root/comfy.screenrc

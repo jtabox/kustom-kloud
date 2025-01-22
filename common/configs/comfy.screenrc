@@ -41,7 +41,6 @@ sessionname comfy-runpod
 screen -t comfy 2 bash
 screen -t syncthing 3 syncthing serve --no-browser --no-default-folder
 screen -t ngrok 4 ngrok start --all
-screen -t downloads 5 bash /root/4.comfy-nodes.sh
 screen -t gen-bash-02 1 bash
 screen -t gen-bash-01 0 bash
 

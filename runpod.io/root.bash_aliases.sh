@@ -309,66 +309,114 @@ whereis() {
     fi
 }
 
-get_multiple_models() {
-    # Downloads multiple model files from a specifically formatted file (see comfy.models)
+install_multiple_nodes() {
+    # Installs multiple nodes from a file containing an array with node repo urls
+    cecho cyan "\n\n::::::::::::::::::::::::::::::::::::::::::::\n::::: ComfyUI Nodes Install From File  :::::\n::::::::::::::::::::::::::::::::::::::::::::\n\n"
+
     if [ -z "$1" ]; then
-        cecho red "Usage: download_multiple <file_with_urls>"
-        cecho red "Downloads multiple files from a specifically formatted file with URLs:"
-        cecho red "A shell script that sets the COMFY_MODELS_CKPTS, COMFY_MODELS_LORAS, COMFY_MODELS_CLIP, COMFY_MODELS_OTHER arrays with the URLs\nwhich are then downloaded in ComfyUI's respective model folders"
+        cecho red "\n:: Usage: install_multiple_nodes <file_with_nodes>"
+        cecho red ":: Installs multiple nodes from a file containing an array with node repo URLs ('COMFY_NODES').\n"
         return 1
     elif [ ! -f "$1" ]; then
-        cecho red "\nError! Could not find a file to read at $1 !"
+        cecho red "\n:: Fatal error: $1 doesn't seem to be a valid file!\n"
         return 1
-    else
-        source "$1"
+    elif ! command -v comfy &>/dev/null; then
+        cecho red "\n:: Fatal error: The 'comfy' command is required but not available!"
+        return 1
     fi
+    source "$1"
+    cecho green "\n:: Imported list with ${#COMFY_NODES[@]} nodes, starting installation ...\n"
+
+    # Define the group size
+    GROUP_SIZE=20
+    # Calculate the number of groups needed
+    TOTAL_NODES=${#COMFY_NODES[@]}
+    NUM_GROUPS=$(((TOTAL_NODES + GROUP_SIZE - 1) / GROUP_SIZE))
+    # Loop through each group and install the nodes
+    for ((i = 0; i < NUM_GROUPS; i++)); do
+        START_INDEX=$((i * GROUP_SIZE))
+        END_INDEX=$((START_INDEX + GROUP_SIZE))
+        # Ensure END_INDEX does not exceed the total number of nodes
+        if [ "$END_INDEX" -gt "$TOTAL_NODES" ]; then
+            END_INDEX="$TOTAL_NODES"
+        fi
+        # Calculate the length of the current group
+        GROUP_LENGTH=$((END_INDEX - START_INDEX))
+        # Slice the array to get the current group of nodes
+        CURRENT_GROUP=("${COMFY_NODES[@]:START_INDEX:GROUP_LENGTH}")
+        # Form the command for the current group
+        nodes_command="comfy node install ${CURRENT_GROUP[*]}"
+        # Run the command
+        cecho orange "\n:: Running command for group $((i + 1)) of $NUM_GROUPS ..."
+        $nodes_command
+    done
+    cecho green "\n\n:::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n::::: Finished processing all the nodes in the file :::::\n:::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n\n"
+}
+
+download_multiple_models() {
+    # Downloads multiple models from a file containing an array with model urls
+    cecho cyan "\n\n::::::::::::::::::::::::::::::::::::::::::::::\n::::: ComfyUI Models Download From File  :::::\n::::::::::::::::::::::::::::::::::::::::::::::\n\n"
+
+    if [ -z "$1" ]; then
+        cecho red "\n:: Usage: download_multiple_models <file_with_models>"
+        cecho red ":: Downloads multiple models from a file containing up to four arrays with model direct URLs\n('COMFY_MODELS_CKPTS', 'COMFY_MODELS_LORAS', 'COMFY_MODELS_CLIP', 'COMFY_MODELS_OTHER'), saving in the appropriate folder.\n"
+        return 1
+    elif [ ! -f "$1" ]; then
+        cecho red "\n:: Fatal error: $1 doesn't seem to be a valid file!\n"
+        return 1
+    elif [ -z "$COMFYUI_PATH" ]; then
+        cecho red "\n:: Fatal error: COMFYUI_PATH is not set!\n"
+        return 1
+    elif [ ! -d "$COMFYUI_PATH"/models ]; then
+        cecho red "\n:: Fatal error: Can't find the ComfyUI models directory at $COMFYUI_PATH!"
+        return 1
+    fi
+
+    source "$1"
     len_ckpts=${#COMFY_MODELS_CKPTS[@]}
     len_loras=${#COMFY_MODELS_LORAS[@]}
     len_clip=${#COMFY_MODELS_CLIP[@]}
     len_other=${#COMFY_MODELS_OTHER[@]}
 
-    cecho green "Imported list with:\n"
-    cecho green "${len_ckpts} checkpoints"
-    cecho green "${len_loras} loras"
-    cecho green "${len_clip} text encoders"
-    cecho green "${len_other} other models"
+    cecho green ":: Imported list with:\n"
+    cecho green ":::: ${len_ckpts} checkpoints"
+    cecho green ":::: ${len_loras} loras"
+    cecho green ":::: ${len_clip} text encoders"
+    cecho green ":::: ${len_other} other models\n"
 
-    cecho green "Fetching checkpoints ..."
+    cecho green "\n:: Fetching checkpoints ..."
     ckpt_counter=1
     for file_url in "${COMFY_MODELS_CKPTS[@]}"; do
         cecho orange "$ckpt_counter / $len_ckpts ..."
         getaimodel "$file_url" ckpt
         ((ckpt_counter++))
     done
-
     # also link the files inside the comfyui checkpoints folder to unet folder
     for ckpt_file in "$COMFYUI_PATH"/models/checkpoints/*; do
         ln -s -f "$ckpt_file" "$COMFYUI_PATH"/models/unet/
     done
-
-    cecho green "Fetching loras ..."
+    cecho green "\n:: Fetching loras ..."
     loras_counter=1
     for file_url in "${COMFY_MODELS_LORAS[@]}"; do
         cecho orange "$loras_counter / $len_loras ..."
         getaimodel "$file_url" lora
         ((loras_counter++))
     done
-
-    cecho green "Fetching text encoders ..."
+    cecho green "\n:: Fetching text encoders ..."
     clip_counter=1
     for file_url in "${COMFY_MODELS_CLIP[@]}"; do
         cecho orange "$clip_counter / $len_clip ..."
         getaimodel "$file_url" clip
         ((clip_counter++))
     done
-
-    cecho green "Fetching other models in $COMFYUI_PATH/models/_inc, move them manually to appropriate folder ..."
+    cecho green "\n:: Fetching other models in $COMFYUI_PATH/models/_inc, move them manually to appropriate folders as necessary ..."
     other_counter=1
     for file_url in "${COMFY_MODELS_OTHER[@]}"; do
         cecho orange "$other_counter / $len_other ..."
         getaimodel "$file_url" inc
         ((other_counter++))
     done
+    cecho green "\n\n::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n::::: Finished processing all the models in the file :::::\n::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n\n"
 }
 
 run_comfy() {
@@ -383,7 +431,8 @@ run_comfy() {
 export -f cecho
 export -f fetch_url
 export -f getaimodel
-export -f get_multiple_models
+export -f install_multiple_nodes
+export -f download_multiple_models
 
 # add some paths
 path-add /root/.local/bin
