@@ -65,5 +65,6 @@ for ((i=0; i<NUM_GROUPS; i++)); do
     $nodes_command
 done
 
-cecho green "\n\n::::: Finished installing the nodes :::::"
-cecho yellow "::::: Next: run './4.comfy-models.sh' to install ComfyUI models :::::\n"
+cecho green "\n\n::::: Finished installing ComfyUI nodes :::::\n"
+cecho yellow "::::: Next step :::::"
+cecho yellow "::::: - | ./5.comfy-models.sh | - to download ComfyUI models :::::\n"

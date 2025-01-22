@@ -42,12 +42,15 @@ get_config "common/configs/comfy.screenrc"
 get_config "common/configs/comfy.settings.json"
 get_config "common/configs/comfy.templates.json"
 get_config "common/configs/mgr.config.ini"
+get_config "common/configs/ngrok-config.yml"
+get_config "common/configs/comfy-cli.config.ini"
 
 get_config "runpod.io/2.comfy-install.sh" exec
-get_config "runpod.io/3.comfy-nodes.sh" exec
-get_config "runpod.io/4.comfy-models.sh" exec
-get_config "runpod.io/5.init-apps.sh" exec
+get_config "runpod.io/3.init-apps.sh" exec
+get_config "runpod.io/4.comfy-nodes.sh" exec
+get_config "runpod.io/5.comfy-models.sh" exec
 
-cecho green "\n\n::::: Finished setting up files and folders :::::"
-cecho yellow "::::: Don't forget to 'source .bash_aliases' ! :::::"
-cecho yellow "::::: Next: run './2.comfy-install.sh' to install ComfyUI :::::\n"
+cecho green "\n\n::::: Finished setting up files and folders :::::\n"
+cecho yellow "::::: Next steps :::::"
+cecho yellow "::::: - | source .bash_aliases | :::::"
+cecho yellow "::::: - | ./2.comfy-install.sh | - to install ComfyUI :::::\n"

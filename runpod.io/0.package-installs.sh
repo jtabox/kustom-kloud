@@ -22,8 +22,11 @@ apt-get install -y --no-install-recommends \
     btop \
     cifs-utils \
     duf \
+    espeak-ng \
+    ffmpeg \
     git-lfs \
     jq \
+    lsof \
     mc \
     ncdu \
     nano \
@@ -35,37 +38,22 @@ apt-get install -y --no-install-recommends \
 
 # Dev oriented stuff
 apt-get install -y --no-install-recommends \
-    acl \
-    attr \
     autoconf \
     automake \
     cmake \
-    ffmpeg \
-    file \
-    gawk \
     gfortran \
-    inotify-tools \
     libatlas-base-dev \
-    libavcodec-dev \
-    libavfilter-dev \
-    libavformat-dev \
-    libavutil-dev \
-    libblas-dev \
     libhdf5-serial-dev \
-    liblapack-dev \
-    libpostproc-dev \
-    libsm6 \
     libssl-dev \
-    libswresample-dev \
-    libswscale-dev \
-    libv4l-dev \
-    libx264-dev \
-    libxrender-dev \
-    libxvidcore-dev \
-    lsof \
-    nfs-common \
-    python3-cmarkgfm \
-    zstd
+    build-essential \
+    python3-dev \
+    libffi-dev \
+    libncurses5-dev \
+    libbz2-dev \
+    liblzma-dev \
+    libreadline-dev \
+    libsqlite3-dev \
+    zlib1g-dev
 
 # Some extra packages from other repos
 mkdir -p /etc/apt/keyrings && \
@@ -108,5 +96,5 @@ wget -q https://raw.githubusercontent.com/jtabox/kustom-kloud/main/runpod.io/1.f
     chown root:root 1.files-folders.sh && \
     chmod +x 1.files-folders.sh
 
-echo -e "\n\n::::: Finished package installs :::::"
-echo -e "::::: Next: run './1.files-folders.sh' :::::\n"
+echo -e "\n\n::::: Finished package installs :::::\n"
+echo -e "::::: Next step :::::\n::::: - | ./1.files-folders.sh | - to set up files and folders :::::\n"

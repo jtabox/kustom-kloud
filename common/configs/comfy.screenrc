@@ -37,9 +37,11 @@ logfile /home/user/docs/screenlogs/%S-%n-%t.log
 # Enable logging for all windows
 deflog off
 
-sessionname comfy
-screen -t gen-bash 0 bash
-screen -t comfy 1 bash
-screen -t syncthing 2 syncthing serve --no-browser
-screen -t ngrok 3 ngrok http --url=civil-known-bluebird.ngrok-free.app --oauth google --oauth-allow-email j.tabox@gmail.com 8188
-screen -p 1
+sessionname comfy-runpod
+screen -t comfy 2 bash
+screen -t syncthing 3 syncthing serve --no-browser --no-default-folder
+screen -t ngrok 4 ngrok start --all
+screen -t downloads 5 bash /root/4.comfy-nodes.sh
+screen -t gen-bash-02 1 bash
+screen -t gen-bash-01 0 bash
+

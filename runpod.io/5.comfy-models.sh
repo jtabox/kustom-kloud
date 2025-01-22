@@ -32,5 +32,6 @@ fi
 
 get_multiple_models "/root/comfy.models"
 
-cecho green "\n\n::::: Finished installing the models :::::"
-cecho yellow "::::: Next: run './5.init-apps.sh' to start up ngrok and syncthing :::::\n"
+cecho green "\n\n::::: Finished downloading the models :::::\n"
+cecho yellow "::::: Next step :::::"
+cecho yellow "::::: - | ./5.init-apps.sh | - to initialize ngrok and syncthing :::::\n"

@@ -40,14 +40,27 @@ pip install comfy-cli
 
 mkdir -p "$COMFYUI_PATH"/user/default/ComfyUI-Manager
 mv /root/comfy.settings.json /root/comfy.templates.json "$COMFYUI_PATH"/user/default
-cp /root/mgr.config.ini "$COMFYUI_PATH"/custom_nodes/ComfyUI-Manager
-mv /root/mgr.config.ini "$COMFYUI_PATH"/user/default/ComfyUI-Manager
+cp /root/mgr.config.ini "$COMFYUI_PATH"/custom_nodes/ComfyUI-Manager/config.ini
+mv /root/mgr.config.ini "$COMFYUI_PATH"/user/default/ComfyUI-Manager/config.ini
 
-if ! comfy set-default "$COMFYUI_PATH"; then
-    cecho red "\n\n::::: Failed to set the default ComfyUI path via comfy command!\nCheck if everything is working manually. Exiting :::::"
-    cecho yellow "::::: Next: run './3.comfy-nodes.sh' to install ComfyUI nodes :::::\n"
+mkdir -p "/root/.config/comfy-cli"
+
+cat <<EOF > /root/.config/comfy-cli/config.ini
+[DEFAULT]
+enable_tracking = False
+default_workspace = $COMFYUI_PATH
+default_launch_extras =
+recent_workspace = $COMFYUI_PATH
+
+EOF
+
+if ! comfy --skip-prompt which; then
+    cecho red "\n\n::::: The comfy command isn't working! :::::\n::::: Check if everything is working manually before proceeding :::::\n"
+    cecho yellow "::::: Next step :::::"
+    cecho yellow "::::: - | ./3.init-apps.sh | - to initialize ngrok & SyncThing :::::\n"
     exit 1
 else
-    cecho green "\n\n::::: ComfyUI installation completed successfully. :::::\n::::: Default ComfyUI path set successfully as $COMFYUI_PATH :::::"
-    cecho yellow "::::: Next: run './3.comfy-nodes.sh' to install ComfyUI nodes :::::\n"
+    cecho green "\n\n::::: ComfyUI installation completed successfully :::::\n::::: Default ComfyUI path set successfully as $COMFYUI_PATH :::::\n"
+    cecho yellow "::::: Next step :::::"
+    cecho yellow "::::: - | ./3.init-apps.sh | - to initialize ngrok & SyncThing :::::\n"
 fi
