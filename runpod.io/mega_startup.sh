@@ -135,7 +135,7 @@ echo -e "\n\n:::::::::::::::::::::::::::::::::::::\n::::: Finished package insta
 
 get_repo_file() {
     echo -e "\nFetching: $1"
-    wget -q "https://raw.githubusercontent.com/jtabox/kustom-kloud/main/$1" || exit 1
+    wget -q "https://raw.githubusercontent.com/jtabox/kustom-kloud/megascript-v2/$1" || exit 1
     filename=$(basename "$1")
     chown root:root "$filename" || exit 1
     #if a second arg is passed, make the file executable
@@ -154,12 +154,12 @@ if [ $FIRST_TIME_INSTALL ]; then
     cd /root || exit 1
 
     echo -e "\nFetching: .bash_aliases"
-    wget -qO .bash_aliases https://raw.githubusercontent.com/jtabox/kustom-kloud/main/runpod.io/root.bash_aliases.sh && \
+    wget -qO .bash_aliases https://raw.githubusercontent.com/jtabox/kustom-kloud/megascript-v2/runpod.io/root.bash_aliases.sh && \
         chown root:root .bash_aliases && \
         source .bash_aliases
 
     cecho cyan "\nFetching: nano config files"
-    wget -q https://raw.githubusercontent.com/jtabox/kustom-kloud/main/common/configs/nano-conf.tgz && \
+    wget -q https://raw.githubusercontent.com/jtabox/kustom-kloud/megascript-v2/common/configs/nano-conf.tgz && \
         tar -xzf nano-conf.tgz -C /root/ && \
         rm nano-conf.tgz && \
         chown -R root:root /root/.nanorc /root/.nano
