@@ -6,7 +6,10 @@
 # Runs as root, no sudo required.
 
 # Download manually at first run:
-# wget -q https://raw.githubusercontent.com/jtabox/kustom-kloud/megascript-v2/runpod.io/mega_startup.sh && chmod +x mega_startup.sh && ./mega_startup.sh
+# cd / && \
+# wget -qO /root/mega_startup.sh https://raw.githubusercontent.com/jtabox/kustom-kloud/megascript-v2/runpod.io/mega_startup.sh && \
+# chmod +x /root/mega_startup.sh && \
+# /root/mega_startup.sh
 
 # Exit on error, pipefail
 set -eo pipefail
@@ -278,8 +281,4 @@ else
     source /root/.bash_aliases
 fi
 
-cecho green "\n\n::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n::::: Initialization completed. Press Enter to start the session :::::\n::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n\n"
-read -r
-
-# Start the session
-screen -c /root/comfy.screenrc
+cecho green "\n\n:::::::::::::::::::::::::::::::::::::\n::::: Initialization completed. :::::\n:::::::::::::::::::::::::::::::::::::\n\n"
