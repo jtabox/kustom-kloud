@@ -174,6 +174,7 @@ if [ $FIRST_TIME_INSTALL ]; then
     cecho cyan "\nFetching: comfy download lists"
     get_repo_file "common/scripts/comfy.nodes"
     get_repo_file "common/scripts/comfy.models"
+    get_repo_file "common/scripts/extra.models"
 
     cecho cyan "\nFetching: screen and comfy config files"
     get_repo_file "common/configs/.screenrc"
