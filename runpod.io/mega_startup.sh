@@ -33,20 +33,24 @@ fi
 # Move root home and python 3.11 installs to /workspace for permanence, if it's the first time, otherwise just link
 if [ $FIRST_TIME_INSTALL ]; then
     # /root
-    mkdir -p /workspace/root
-    chmod 755 /workspace/root
     mv /root /workspace
     # Python 3.11
-    mkdir -p /workspace/usrlocallib/python3.11
-    chmod 755 /workspace/usrlocallib
+    mkdir -p /workspace/usrlocallib && \
+    chmod 755 /workspace/usrlocallib && \
     mv /usr/local/lib/python3.11 /workspace/usrlocallib
+    # usr/local/bin too, since many python packages install binaries there
+    mkdir -p /workspace/usrlocalbin && \
+    chmod 755 /workspace/usrlocalbin && \
+    mv /usr/local/bin /workspace/usrlocalbin
 else
     # Just remove the current versions, they'll be linked to the /workspace versions
     rm -rf /root
     rm -rf /usr/local/lib/python3.11
+    rm -rf /usr/local/bin
 fi
 ln -s /workspace/root /root
 ln -s /workspace/usrlocallib/python3.11 /usr/local/lib/python3.11
+ln -s /workspace/usrlocalbin/bin /usr/local/bin
 
 export DEBIAN_FRONTEND=noninteractive
 
@@ -60,6 +64,7 @@ apt-get install -y --no-install-recommends \
     aria2 \
     btop \
     cifs-utils \
+    dos2unix \
     duf \
     espeak-ng \
     ffmpeg \
