@@ -51,8 +51,8 @@ else
     rm -rf /usr/local/bin
 fi
 ln -s /workspace/root /root
-ln -s /workspace/usrlocallib/python3.11 /usr/local/lib/python3.11
-ln -s /workspace/usrlocalbin/bin /usr/local/bin
+ln -s /workspace/usrlocallib/python3.11 /usr/local/lib
+ln -s /workspace/usrlocalbin/bin /usr/local
 
 export DEBIAN_FRONTEND=noninteractive
 
