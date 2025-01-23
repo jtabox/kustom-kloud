@@ -32,7 +32,7 @@ fi
 
 # Move root home and python 3.11 installs to /workspace for permanence, if it's the first time, otherwise just link
 # Stop jupyter server if it's running, since we'll be moving /usr/local/bin where the jupyter binary is
-jupyter server stop
+jupyter server stop || true
 if [ $FIRST_TIME_INSTALL -eq 1 ]; then
     # /root
     mv /root /workspace
