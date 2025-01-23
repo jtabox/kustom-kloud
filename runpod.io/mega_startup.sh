@@ -22,18 +22,18 @@ if [ -f "/workspace/_INSTALL_COMPLETE" ]; then
     echo -e "\n\n::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
     echo -e "::::: Found existing installation in /workspace, will only adjust existing files :::::"
     echo -e "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n\n"
-    FIRST_TIME_INSTALL=false
+    FIRST_TIME_INSTALL=0
 else
     echo -e "\n\n::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
     echo -e "::::: No existing installation was found, proceeding with first time setup :::::"
     echo -e "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n\n"
-    FIRST_TIME_INSTALL=true
+    FIRST_TIME_INSTALL=1
 fi
 
 # Move root home and python 3.11 installs to /workspace for permanence, if it's the first time, otherwise just link
 # Stop jupyter server if it's running, since we'll be moving /usr/local/bin where the jupyter binary is
 jupyter server stop
-if [ $FIRST_TIME_INSTALL ]; then
+if [ $FIRST_TIME_INSTALL -eq 1 ]; then
     # /root
     mv /root /workspace
     # Python 3.11
@@ -151,7 +151,7 @@ get_repo_file() {
     fi
 }
 
-if [ $FIRST_TIME_INSTALL ]; then
+if [ $FIRST_TIME_INSTALL -eq 1 ]; then
     echo -e "\n\n::::::::::::::::::::::::::::::::::::::::::::\n::::: Starting files and folders setup :::::\n::::::::::::::::::::::::::::::::::::::::::::\n\n"
 
     # Shush
