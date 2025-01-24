@@ -6,10 +6,7 @@
 # Runs as root, no sudo required.
 
 # Download manually at first run:
-# cd / && \
-# wget -qO /root/mega_startup.sh https://raw.githubusercontent.com/jtabox/kustom-kloud/megascript-v2/runpod.io/mega_startup.sh && \
-# chmod +x /root/mega_startup.sh && \
-# /root/mega_startup.sh
+# cd / && wget -qO /root/mega_startup.sh https://raw.githubusercontent.com/jtabox/kustom-kloud/megascript-v2/runpod.io/mega_startup.sh && chmod +x /root/mega_startup.sh && /root/mega_startup.sh
 
 # Exit on error, pipefail
 set -eo pipefail
@@ -33,26 +30,32 @@ else
     FIRST_TIME_INSTALL=1
 fi
 
-# Move root home and python 3.11 installs to /workspace for permanence, if it's the first time, otherwise just link
+# Move root home, python 3.11 installs and /usr/local/bin to /workspace for permanence, if it's the first time, otherwise just link
+
 # Stop jupyter server if it's running, since we'll be moving /usr/local/bin where the jupyter binary is
+echo ":: Stopping any running Jupyter server"
 jupyter server stop || true
+
 if [ $FIRST_TIME_INSTALL -eq 1 ]; then
+    echo ":: Moving /root, /usr/local/lib/python3.11 and /usr/local/bin to /workspace"
     # /root
     mv /root /workspace
     # Python 3.11
-    mkdir -p /workspace/usrlocallib && \
-    chmod 755 /workspace/usrlocallib && \
-    mv /usr/local/lib/python3.11 /workspace/usrlocallib
+    mkdir -p /workspace/usrlocallib &&
+        chmod 755 /workspace/usrlocallib &&
+        mv /usr/local/lib/python3.11 /workspace/usrlocallib
     # usr/local/bin too, since many python packages install binaries there
-    mkdir -p /workspace/usrlocalbin && \
-    chmod 755 /workspace/usrlocalbin && \
-    mv /usr/local/bin /workspace/usrlocalbin
+    mkdir -p /workspace/usrlocalbin &&
+        chmod 755 /workspace/usrlocalbin &&
+        mv /usr/local/bin /workspace/usrlocalbin
 else
     # Just remove the current versions, they'll be linked to the /workspace versions
+    echo ":: Removing /root, /usr/local/lib/python3.11 and /usr/local/bin"
     rm -rf /root
     rm -rf /usr/local/lib/python3.11
     rm -rf /usr/local/bin
 fi
+echo ":: Linking /root, /usr/local/lib/python3.11 and /usr/local/bin to their /workspace folders"
 ln -s /workspace/root /root
 ln -s /workspace/usrlocallib/python3.11 /usr/local/lib
 ln -s /workspace/usrlocalbin/bin /usr/local
@@ -62,9 +65,11 @@ export DEBIAN_FRONTEND=noninteractive
 # System packages must be installed and updated either way
 echo -e "\n\n:::::::::::::::::::::::::::::::::::::\n::::: Starting package installs :::::\n:::::::::::::::::::::::::::::::::::::\n\n"
 # Update
+echo ":: Upgrading packages"
 apt-get update -y && apt-get upgrade -y
 
 # Basic packages
+echo ":: Installing basic packages"
 apt-get install -y --no-install-recommends \
     aria2 \
     btop \
@@ -86,6 +91,7 @@ apt-get install -y --no-install-recommends \
     zip
 
 # Dev oriented stuff
+echo ":: Installing dev packages"
 apt-get install -y --no-install-recommends \
     autoconf \
     automake \
@@ -105,46 +111,56 @@ apt-get install -y --no-install-recommends \
     zlib1g-dev
 
 # Extra packages from other repos
-mkdir -p /etc/apt/keyrings && \
-wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | gpg --dearmor -o /etc/apt/keyrings/gierens.gpg && \
-echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | tee /etc/apt/sources.list.d/gierens.list && \
-chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list
+echo ":: Installing extra packages from other repos"
+mkdir -p /etc/apt/keyrings &&
+    wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | gpg --dearmor -o /etc/apt/keyrings/gierens.gpg &&
+    echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | tee /etc/apt/sources.list.d/gierens.list &&
+    chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list
 
-curl -sSL https://ngrok-agent.s3.amazonaws.com/ngrok.asc | tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null && \
-echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | tee /etc/apt/sources.list.d/ngrok.list
+curl -sSL https://ngrok-agent.s3.amazonaws.com/ngrok.asc | tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null &&
+    echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | tee /etc/apt/sources.list.d/ngrok.list
 
-curl -Lo /etc/apt/keyrings/syncthing-archive-keyring.gpg https://syncthing.net/release-key.gpg && \
-echo "deb [signed-by=/etc/apt/keyrings/syncthing-archive-keyring.gpg] https://apt.syncthing.net/ syncthing stable" | tee /etc/apt/sources.list.d/syncthing.list
+curl -Lo /etc/apt/keyrings/syncthing-archive-keyring.gpg https://syncthing.net/release-key.gpg &&
+    echo "deb [signed-by=/etc/apt/keyrings/syncthing-archive-keyring.gpg] https://apt.syncthing.net/ syncthing stable" | tee /etc/apt/sources.list.d/syncthing.list
 
-apt-get update && \
-apt-get install -y --no-install-recommends \
-    eza \
-    ngrok \
-    syncthing
+curl -sSLf https://get.openziti.io/tun/package-repos.gpg | gpg --dearmor --output /usr/share/keyrings/openziti.gpg &&
+    chmod a+r /usr/share/keyrings/openziti.gpg &&
+    tee /etc/apt/sources.list.d/openziti-release.list >/dev/null <<EOF
+deb [signed-by=/usr/share/keyrings/openziti.gpg] https://packages.openziti.org/zitipax-openziti-deb-stable debian main
+EOF
+
+apt-get update &&
+    apt-get install -y --no-install-recommends \
+        eza \
+        ngrok \
+        syncthing \
+        zrok
 
 # Direct downloads
-wget https://github.com/sharkdp/bat/releases/download/v0.25.0/bat_0.25.0_amd64.deb && \
-dpkg -i bat_0.25.0_amd64.deb && \
-rm bat_0.25.0_amd64.deb
+echo ":: Installing direct downloads"
+wget https://github.com/sharkdp/bat/releases/download/v0.25.0/bat_0.25.0_amd64.deb &&
+    dpkg -i bat_0.25.0_amd64.deb &&
+    rm bat_0.25.0_amd64.deb
 
-curl -LO https://github.com/BurntSushi/ripgrep/releases/download/14.1.1/ripgrep_14.1.1-1_amd64.deb && \
-dpkg -i ripgrep_14.1.1-1_amd64.deb && \
-rm ripgrep_14.1.1-1_amd64.deb
+curl -LO https://github.com/BurntSushi/ripgrep/releases/download/14.1.1/ripgrep_14.1.1-1_amd64.deb &&
+    dpkg -i ripgrep_14.1.1-1_amd64.deb &&
+    rm ripgrep_14.1.1-1_amd64.deb
 
-curl -Lo /usr/local/bin/ctop https://github.com/LordOverlord/ctop/releases/download/v0.1.8/ctop-linux-amd64 && \
-chmod +x /usr/local/bin/ctop
+curl -Lo /usr/local/bin/ctop https://github.com/LordOverlord/ctop/releases/download/v0.1.8/ctop-linux-amd64 &&
+    chmod +x /usr/local/bin/ctop
 
 wget -qO- https://astral.sh/uv/install.sh | sh
 
 # Cleanup
-apt-get autoremove -y && \
-apt-get clean && \
-rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+echo ":: Cleaning up"
+apt-get autoremove -y &&
+    apt-get clean &&
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 echo -e "\n\n:::::::::::::::::::::::::::::::::::::\n::::: Finished package installs :::::\n:::::::::::::::::::::::::::::::::::::\n\n"
 
 get_repo_file() {
-    echo -e "\nFetching: $1"
+    echo -e "\n:: Fetching: $1"
     wget -q "https://raw.githubusercontent.com/jtabox/kustom-kloud/megascript-v2/$1" || exit 1
     filename=$(basename "$1")
     chown root:root "$filename" || exit 1
@@ -163,23 +179,23 @@ if [ $FIRST_TIME_INSTALL -eq 1 ]; then
     # Fetch some files
     cd /root || exit 1
 
-    echo -e "\nFetching: .bash_aliases"
-    wget -qO .bash_aliases https://raw.githubusercontent.com/jtabox/kustom-kloud/megascript-v2/runpod.io/root.bash_aliases.sh && \
-        chown root:root .bash_aliases && \
+    echo -e "\n:: Fetching: .bash_aliases"
+    wget -qO .bash_aliases https://raw.githubusercontent.com/jtabox/kustom-kloud/megascript-v2/runpod.io/root.bash_aliases.sh &&
+        chown root:root .bash_aliases &&
         source .bash_aliases
 
-    cecho cyan "\nFetching: nano config files"
-    wget -q https://raw.githubusercontent.com/jtabox/kustom-kloud/megascript-v2/common/configs/nano-conf.tgz && \
-        tar -xzf nano-conf.tgz -C /root/ && \
-        rm nano-conf.tgz && \
+    cecho cyan "\n:: Fetching: nano config files"
+    wget -q https://raw.githubusercontent.com/jtabox/kustom-kloud/megascript-v2/common/configs/nano-conf.tgz &&
+        tar -xzf nano-conf.tgz -C /root/ &&
+        rm nano-conf.tgz &&
         chown -R root:root /root/.nanorc /root/.nano
 
-    cecho cyan "\nFetching: comfy download lists"
+    cecho cyan "\n:: Fetching: comfy download lists"
     get_repo_file "common/scripts/comfy.nodes"
     get_repo_file "common/scripts/comfy.models"
     get_repo_file "common/scripts/extra.models"
 
-    cecho cyan "\nFetching: screen and comfy config files"
+    cecho cyan "\n:: Fetching: screen and comfy config files"
     get_repo_file "common/configs/.screenrc"
     get_repo_file "common/configs/comfy.screenrc"
     get_repo_file "common/configs/comfy.settings.json"
@@ -191,18 +207,18 @@ if [ $FIRST_TIME_INSTALL -eq 1 ]; then
     cecho cyan "\n\n:::::::::::::::::::::::::::::::\n::::: Installing ComfyUI  :::::\n:::::::::::::::::::::::::::::::\n\n"
     cd /workspace
 
-    git clone https://github.com/comfyanonymous/ComfyUI.git && \
-    cd /workspace/ComfyUI/custom_nodes && \
-    git clone https://github.com/ltdrdata/ComfyUI-Manager.git && \
-    cecho green "ComfyUI and Manager cloned successfully"
+    git clone https://github.com/comfyanonymous/ComfyUI.git &&
+        cd /workspace/ComfyUI/custom_nodes &&
+        git clone https://github.com/ltdrdata/ComfyUI-Manager.git &&
+        cecho green "ComfyUI and Manager cloned successfully"
 
     # Some extra packages (torch v2.4.1+cu124 is already installed, has to be locked otherwise xformers will install a different version)
     python -m pip install --upgrade pip
     pip install --no-build-isolation flash-attn
     pip install xformers torch==2.4.1+cu124 --index-url https://download.pytorch.org/whl/cu124
-    pip install -r /workspace/ComfyUI/requirements.txt && \
-    pip install -r /workspace/ComfyUI/custom_nodes/ComfyUI-Manager/requirements.txt && \
-    pip install comfy-cli
+    pip install -r /workspace/ComfyUI/requirements.txt &&
+        pip install -r /workspace/ComfyUI/custom_nodes/ComfyUI-Manager/requirements.txt &&
+        pip install comfy-cli
 
     mkdir -p "$COMFYUI_PATH"/user/default/ComfyUI-Manager
     mv /root/comfy.settings.json /root/comfy.templates.json "$COMFYUI_PATH"/user/default
@@ -210,7 +226,7 @@ if [ $FIRST_TIME_INSTALL -eq 1 ]; then
     mv /root/mgr.config.ini "$COMFYUI_PATH"/user/default/ComfyUI-Manager/config.ini
 
     mkdir -p "/root/.config/comfy-cli"
-    cat <<EOF > /root/.config/comfy-cli/config.ini
+    cat <<EOF >/root/.config/comfy-cli/config.ini
 [DEFAULT]
 enable_tracking = False
 default_workspace = $COMFYUI_PATH
@@ -230,7 +246,7 @@ EOF
 
     mkdir -p /root/.config/ngrok
 
-    cat <<EOF > /root/.config/ngrok/ngrok.yml
+    cat <<EOF >/root/.config/ngrok/ngrok.yml
 version: "3"
 agent:
   authtoken: $NGROK_AUTH_TOKEN
@@ -278,6 +294,7 @@ EOF
     cecho orange "\n:: To install the initial node collection from file: 'install_multiple_nodes /root/comfy.nodes'"
     cecho orange ":: To install the initial model collection from file: 'download_multiple_models /root/comfy.models'\n"
 else
+    # All the above are already in /workspace, just source the bash_aliases
     source /root/.bash_aliases
 fi
 
