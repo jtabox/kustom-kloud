@@ -1,15 +1,14 @@
-# ~/.screenrc
+# ~/comfy-session.screenrc
 
 # Disable startup message
 startup_message off
 
 # Increase scrollback buffer size
-defscrollback 10000
+defscrollback 7000
 term screen-256color
 windowlist -b
 
 # Enable mouse support for scrolling
-#mousetrack off  # mousetrack on prevents scrollback
 termcapinfo xterm* ti@:te@
 
 # Enable hardstatus line
@@ -20,9 +19,6 @@ caption always "%{= kw}%-w%{= kG}%n %t%{-}%+w"
 
 # Automatically set window title
 shelltitle "$ |bash"
-
-# Custom key bindings
-#bindkey ^k kill  # Bind Ctrl-k to kill the current window
 
 # Auto-detach on hangup
 autodetach on
@@ -38,7 +34,7 @@ logfile /home/user/docs/screenlogs/%S-%n-%t.log
 deflog off
 
 sessionname comfy
+screen -t tunnel 3 bash
 screen -t syncthing 2 bash
-screen -t ngrok 1 bash
-screen -t comfy 0 bash
-
+screen -t comfyui 1 bash
+screen -t gen 0 bash
