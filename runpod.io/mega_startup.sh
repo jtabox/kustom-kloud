@@ -197,7 +197,7 @@ if [ $FIRST_TIME_INSTALL -eq 1 ]; then
 
     cecho cyan "\n:: Fetching: screen and comfy config files"
     get_repo_file "common/configs/.screenrc"
-    get_repo_file "common/configs/comfy.screenrc"
+    get_repo_file "common/configs/comfy-session.screenrc"
     get_repo_file "common/configs/comfy.settings.json"
     get_repo_file "common/configs/comfy.templates.json"
     get_repo_file "common/configs/mgr.config.ini"
@@ -299,3 +299,5 @@ else
 fi
 
 cecho green "\n\n:::::::::::::::::::::::::::::::::::::\n::::: Initialization completed. :::::\n:::::::::::::::::::::::::::::::::::::\n\n"
+
+screen -c /root/comfy-session.screenrc -S comfy
