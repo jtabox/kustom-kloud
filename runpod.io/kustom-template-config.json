@@ -1,0 +1,22 @@
+{
+    "Name": "RunPod-Kustom-Torch2.4.0-Cuda-12.4-Ubuntu22.04",
+    "Type": "Pod",
+    "Compute": "Nvidia GPU",
+    "Visibility": "Private",
+    "Container Image": "runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04",
+    "Registry Credentials": [],
+    "Container Start Command": "",
+    "Container Disk in GB": 20,
+    "Volume Disk in GB": 280,
+    "Volume Mount Path": "/workspace",
+    "Exposed HTTP Ports": "7667,8778,9889,54638",
+    "Exposed TCP Ports": "22,6556,5445,41648",
+    "Environment Variables": {
+        "RUNPOD_SECRET_CAK": "{{ RUNPOD_SECRET_CIVITAI_API_KEY }}",
+        "RUNPOD_SECRET_FAK": "{{ RUNPOD_SECRET_FAL_KEY }}",
+        "RUNPOD_SECRET_HFT": "{{ RUNPOD_SECRET_HF_TOKEN }}",
+        "RUNPOD_SECRET_NAT": "{{ RUNPOD_SECRET_NGROK_AUTH_TOKEN }}",
+        "RUNPOD_SECRET_OAK": "{{ RUNPOD_SECRET_OPENROUTER_API_KEY }}",
+        "RUNPOD_SECRET_RAT": "{{ RUNPOD_SECRET_REPLICATE_API_TOKEN }}"
+    }
+}

@@ -1,5 +1,5 @@
 #!/bin/bash
-## A customized .bash_aliases I use in cloud instances - root version (no sudo)
+## A customized .bash_aliases I use in cloud instances - root version (no sudo) for runpod.io
 
 # shellcheck disable=all
 
@@ -423,7 +423,7 @@ download_multiple_models() {
     cecho green "\n\n::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n::::: Finished processing all the models in the file :::::\n::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n\n"
 }
 
-run_comfy() {
+start-comfy() {
     cd /workspace/ComfyUI || return 1
     git pull
     comfy update all
