@@ -29,12 +29,12 @@ alias journal-clean='journalctl --vacuum-time=3d'
 alias l='eza -ahMl --smart-group --icons --time-style=long-iso --group-directories-first --color-scale --git-repos'
 alias ll='ls -lFah --group-directories-first --color=auto'
 alias mv='mv --verbose'
-alias run-comfy='comfy launch'
+# alias run-comfy='comfy launch'
 alias run-ngrok='ngrok start --all'
 alias run-syncthing='syncthing serve --no-browser --no-default-folder'
 alias scan-host='nmap -sP'
 alias sccp='scp -o UserKnownHostsFile=/dev/null -o GlobalKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
-alias show-conns='ss -p | cat'
+alias show-connections='ss -p | cat'
 alias show-mem-strings='dd if=/dev/mem | cat | strings'
 alias show-ports='lsof -Pan -i tcp -i udp'
 alias sssh='ssh -o UserKnownHostsFile=/dev/null -o GlobalKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
@@ -46,7 +46,7 @@ alias wget-all='wget --random-wait -r -p -e robots=off -U mozilla -o $HOME/wget_
 alias wget='wget -c'
 alias zombies='ps aux | awk '\''{if ($8=="Z") { print $2 }}'\'''
 
-## Env vars
+## export vars
 # Terminal color codes
 export PTCLR_CLEAR="\e[0;0m"
 export PTCLR_FG_BLUE="\e[1;34m"
@@ -68,24 +68,38 @@ export PTCLR_BG_RED="\e[0;41m"
 export PTCLR_BG_YELLOW="\e[0;43m"
 
 # Various
-export COMFYUI_PATH=/workspace/ComfyUI
-export PYTHONUNBUFFERED=1
-export DEBIAN_FRONTEND=noninteractive
+export COMFYUI_PATH='/workspace/ComfyUI'
 export TZ='Europe/Berlin'
-export PIP_CACHE_DIR=/workspace/.cache/pip
-export PIP_NO_CACHE_DIR=1
-export PIP_DISABLE_PIP_VERSION_CHECK=1
-export PIP_ROOT_USER_ACTION=ignore
-export UV_CACHE_DIR=/workspace/.cache/uv
-export UV_NO_CACHE=1
+
+# pip and uv settings
+export PIP_NO_CACHE_DIR='1'
+export UV_NO_CACHE='1'
+export PIP_CACHE_DIR='/workspace/.cache/pip'
+export UV_CACHE_DIR='/workspace/.cache/uv'
+export VIRTUALENV_OVERRIDE_APP_DATA='/workspace/.cache/virtualenv/'
+export PIP_DISABLE_PIP_VERSION_CHECK='1'
+export PIP_ROOT_USER_ACTION='ignore'
+
+# huggingface settings
+export HF_HOME='/workspace/.cache/huggingface/'
+export HF_DATASETS_CACHE='/workspace/.cache/huggingface/datasets/'
+export DEFAULT_HF_METRICS_CACHE='/workspace/.cache/huggingface/metrics/'
+export DEFAULT_HF_MODULES_CACHE='/workspace/.cache/huggingface/modules/'
+export HUGGINGFACE_HUB_CACHE='/workspace/.cache/huggingface/hub/'
+export HUGGINGFACE_ASSETS_CACHE='/workspace/.cache/huggingface/assets/'
+# Faster transfer of models from the hub to the container
+export HF_HUB_ENABLE_HF_TRANSFER='1'
+
+# Set Default Python Version
+export PYTHON_VERSION='3.11'
 
 # Also need to re-export the secrets, because runpod names them weirdly
-export CIVITAI_API_KEY=$RUNPOD_SECRET_CAK
-export FAL_KEY=$RUNPOD_SECRET_FK
-export HF_TOKEN=$RUNPOD_SECRET_HT
-export NGROK_AUTH_TOKEN=$RUNPOD_SECRET_NAT
-export OPENROUTER_API_KEY=$RUNPOD_SECRET_OAK
-export REPLICATE_API_TOKEN=$RUNPOD_SECRET_RAT
+export CIVITAI_API_KEY="$RUNPOD_SECRET_CAK"
+export FAL_KEY="$RUNPOD_SECRET_FAK"
+export HF_TOKEN="$RUNPOD_SECRET_HFT"
+export NGROK_AUTH_TOKEN="$RUNPOD_SECRET_NAT"
+export OPENROUTER_API_KEY="$RUNPOD_SECRET_OAK"
+export REPLICATE_API_TOKEN="$RUNPOD_SECRET_RAT"
 
 ## Functions
 cecho() {
@@ -423,7 +437,7 @@ download_multiple_models() {
     cecho green "\n\n::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n::::: Finished processing all the models in the file :::::\n::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n\n"
 }
 
-start-comfy() {
+run-comfy() {
     cd /workspace/ComfyUI || return 1
     git pull
     comfy update all

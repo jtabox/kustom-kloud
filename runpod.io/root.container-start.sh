@@ -1,12 +1,6 @@
 #!/bin/bash
 # shellcheck disable=SC1091
-
-# Megascript that prepares a pod for ComfyUI, with relevant installs and configs.
-# Checks for /workspace to decide if this a first time install, or a new instance with previous data.
-# Runs as root, no sudo required.
-
-# Download manually at first run:
-# cd / && wget -qO /root/mega_startup.sh https://raw.githubusercontent.com/jtabox/kustom-kloud/megascript-v2/runpod.io/mega_startup.sh && chmod +x /root/mega_startup.sh && /root/mega_startup.sh
+# This script is called from the Dockerfile as the last step
 
 # Exit on error, pipefail
 set -eo pipefail
@@ -60,104 +54,6 @@ ln -s /workspace/root /root
 ln -s /workspace/usrlocallib/python3.11 /usr/local/lib
 ln -s /workspace/usrlocalbin/bin /usr/local
 
-export DEBIAN_FRONTEND=noninteractive
-
-# System packages must be installed and updated either way
-echo -e "\n\n:::::::::::::::::::::::::::::::::::::\n::::: Starting package installs :::::\n:::::::::::::::::::::::::::::::::::::\n\n"
-# Update
-echo ":: Upgrading packages"
-apt-get update -y && apt-get upgrade -y
-
-# Basic packages
-echo ":: Installing basic packages"
-apt-get install -y --no-install-recommends \
-    aria2 \
-    btop \
-    cifs-utils \
-    dos2unix \
-    duf \
-    espeak-ng \
-    ffmpeg \
-    git-lfs \
-    jq \
-    lsof \
-    mc \
-    ncdu \
-    nano \
-    ranger \
-    rsync \
-    screen \
-    unzip \
-    zip
-
-# Dev oriented stuff
-echo ":: Installing dev packages"
-apt-get install -y --no-install-recommends \
-    autoconf \
-    automake \
-    cmake \
-    gfortran \
-    libatlas-base-dev \
-    libhdf5-serial-dev \
-    libssl-dev \
-    build-essential \
-    python3-dev \
-    libffi-dev \
-    libncurses5-dev \
-    libbz2-dev \
-    liblzma-dev \
-    libreadline-dev \
-    libsqlite3-dev \
-    zlib1g-dev
-
-# Extra packages from other repos
-echo ":: Installing extra packages from other repos"
-mkdir -p /etc/apt/keyrings &&
-    wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | gpg --dearmor -o /etc/apt/keyrings/gierens.gpg &&
-    echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | tee /etc/apt/sources.list.d/gierens.list &&
-    chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list
-
-curl -sSL https://ngrok-agent.s3.amazonaws.com/ngrok.asc | tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null &&
-    echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | tee /etc/apt/sources.list.d/ngrok.list
-
-curl -Lo /etc/apt/keyrings/syncthing-archive-keyring.gpg https://syncthing.net/release-key.gpg &&
-    echo "deb [signed-by=/etc/apt/keyrings/syncthing-archive-keyring.gpg] https://apt.syncthing.net/ syncthing stable" | tee /etc/apt/sources.list.d/syncthing.list
-
-curl -sSLf https://get.openziti.io/tun/package-repos.gpg | gpg --dearmor --output /usr/share/keyrings/openziti.gpg &&
-    chmod a+r /usr/share/keyrings/openziti.gpg &&
-    tee /etc/apt/sources.list.d/openziti-release.list >/dev/null <<EOF
-deb [signed-by=/usr/share/keyrings/openziti.gpg] https://packages.openziti.org/zitipax-openziti-deb-stable debian main
-EOF
-
-apt-get update &&
-    apt-get install -y --no-install-recommends \
-        eza \
-        ngrok \
-        syncthing \
-        zrok
-
-# Direct downloads
-echo ":: Installing direct downloads"
-wget https://github.com/sharkdp/bat/releases/download/v0.25.0/bat_0.25.0_amd64.deb &&
-    dpkg -i bat_0.25.0_amd64.deb &&
-    rm bat_0.25.0_amd64.deb
-
-curl -LO https://github.com/BurntSushi/ripgrep/releases/download/14.1.1/ripgrep_14.1.1-1_amd64.deb &&
-    dpkg -i ripgrep_14.1.1-1_amd64.deb &&
-    rm ripgrep_14.1.1-1_amd64.deb
-
-# curl -Lo /usr/local/bin/ctop https://github.com/LordOverlord/ctop/releases/download/v0.1.8/ctop-linux-amd64 &&
-#     chmod +x /usr/local/bin/ctop
-
-wget -qO- https://astral.sh/uv/install.sh | sh
-
-# Cleanup
-echo ":: Cleaning up"
-apt-get autoremove -y &&
-    apt-get clean &&
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-echo -e "\n\n:::::::::::::::::::::::::::::::::::::\n::::: Finished package installs :::::\n:::::::::::::::::::::::::::::::::::::\n\n"
 
 get_repo_file() {
     echo -e "\n:: Fetching: $1"
@@ -301,3 +197,83 @@ fi
 cecho green "\n\n:::::::::::::::::::::::::::::::::::::\n::::: Initialization completed. :::::\n:::::::::::::::::::::::::::::::::::::\n\n"
 
 screen -c /root/comfy-session.screenrc -S comfy
+
+#!/bin/bash
+set -e  # Exit the script if any statement returns a non-true return value
+
+# Execute script if exists
+execute_script() {
+    local script_path=$1
+    local script_msg=$2
+    if [[ -f ${script_path} ]]; then
+        echo "${script_msg}"
+        bash "${script_path}"
+    fi
+}
+
+# Setup ssh
+setup_ssh() {
+    if [[ $PUBLIC_KEY ]]; then
+        echo "Setting up SSH..."
+        mkdir -p ~/.ssh
+        echo "$PUBLIC_KEY" >> ~/.ssh/authorized_keys
+        chmod 700 -R ~/.ssh
+
+         if [ ! -f /etc/ssh/ssh_host_rsa_key ]; then
+            ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -q -N ''
+            echo "RSA key fingerprint:"
+            ssh-keygen -lf /etc/ssh/ssh_host_rsa_key.pub
+        fi
+
+        if [ ! -f /etc/ssh/ssh_host_dsa_key ]; then
+            ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key -q -N ''
+            echo "DSA key fingerprint:"
+            ssh-keygen -lf /etc/ssh/ssh_host_dsa_key.pub
+        fi
+
+        if [ ! -f /etc/ssh/ssh_host_ecdsa_key ]; then
+            ssh-keygen -t ecdsa -f /etc/ssh/ssh_host_ecdsa_key -q -N ''
+            echo "ECDSA key fingerprint:"
+            ssh-keygen -lf /etc/ssh/ssh_host_ecdsa_key.pub
+        fi
+
+        if [ ! -f /etc/ssh/ssh_host_ed25519_key ]; then
+            ssh-keygen -t ed25519 -f /etc/ssh/ssh_host_ed25519_key -q -N ''
+            echo "ED25519 key fingerprint:"
+            ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
+        fi
+
+        service ssh start
+
+        echo "SSH host keys:"
+        for key in /etc/ssh/*.pub; do
+            echo "Key: $key"
+            ssh-keygen -lf "$key"
+        done
+    fi
+}
+
+# Export runpod env vars (not really sure why)
+export_runpod_env_vars() {
+    echo "Exporting environment variables..."
+    printenv | grep -E '^RUNPOD_|^PATH=|^_=' | awk -F = '{ print "export " $1 "=\"" $2 "\"" }' >> /etc/rp_environment
+    echo 'source /etc/rp_environment' >> ~/.bashrc
+}
+
+# ---------------------------------------------------------------------------- #
+#                               Main Program                                   #
+# ---------------------------------------------------------------------------- #
+
+execute_script "/pre_start.sh" "Running pre-start script..."
+
+echo "Pod Started"
+
+setup_ssh
+start_jupyter
+export_env_vars
+
+execute_script "/post_start.sh" "Running post-start script..."
+
+echo "Start script(s) finished, pod is ready to use."
+
+sleep infinity
