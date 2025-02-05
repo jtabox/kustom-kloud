@@ -1,3 +1,5 @@
+# Dockerfile for Kustom Docker image for runpod.io
+
 ARG CUDAVERSION="12.5.1"
 ARG RELEASETYPE="cudnn-devel"
 ARG UBUNTUVERSION="22.04"
@@ -21,7 +23,7 @@ ENV SHELL="/bin/bash" \
     PIP_ROOT_USER_ACTION='ignore' \
     PIP_DISABLE_PIP_VERSION_CHECK='1'
 
-WORKDIR /
+WORKDIR /root
 
 # Do the usual updates-upgrades, basic utils, dev stuff
 RUN apt-get update && \
@@ -46,7 +48,6 @@ RUN apt-get update && \
         mc \
         nano \
         ncdu \
-        nfs-common \
         ranger \
         rsync \
         screen \
@@ -115,3 +116,26 @@ RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
     rm ripgrep_${RIPGREPVERSION}-1_amd64.deb && \
     curl -LsSf https://astral.sh/uv/install.sh | env UV_UNMANAGED_INSTALL="~/.local/bin" sh && \
     rm -rf /tmp/* /var/tmp/*
+
+# Make scripts and configs available to be used
+WORKDIR /tmp/repofiles
+
+COPY --chown=root:root scripts /tmp/repofiles/scripts
+COPY --chown=root:root configs /tmp/repofiles/configs
+
+RUN chmod +x scripts/*
+
+# Run the script to prepare /workspace
+RUN /tmp/repofiles/scripts/kustom.prepare_workspace.sh
+
+# Run the start script
+WORKDIR /root
+
+# Do I expose the ports here?
+# HTTP ports:
+EXPOSE 7667 8778 9889 54638
+# TCP ports:
+EXPOSE 22 6556 5445 41648
+
+# Start the container
+CMD [ "./scripts/kustom.container_start.sh" ]

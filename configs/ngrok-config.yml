@@ -1,0 +1,24 @@
+version: "3"
+agent:
+  authtoken: __NGROK_AUTH_TOKEN__
+
+tunnels:
+  comfy:
+    proto: http
+    addr: 8188
+    domain: "civil-known-bluebird.ngrok-free.app"
+    oauth:
+      provider: "google"
+      allow_emails: ["j.tabox@gmail.com"]
+  syncthing:
+    proto: http
+    addr: 8384
+    oauth:
+      provider: "google"
+      allow_emails: ["j.tabox@gmail.com"]
+  jupyter:
+    proto: http
+    addr: 8888
+    oauth:
+      provider: "google"
+      allow_emails: ["j.tabox@gmail.com"]

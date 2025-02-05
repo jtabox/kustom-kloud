@@ -1,12 +1,16 @@
 #!/bin/bash
-## A customized .bash_aliases I use in cloud instances - root version (no sudo) for runpod.io
-
 # shellcheck disable=all
+
+### Enormous (and it's an understatement) .bash_aliases file for cloud instances
+### For root user, no sudo needed
 
 ## lol prompt
 PS1='\[\e[92;1m\]\A \[\e[94m\]\u $(if [[ $? -eq 0 ]]; then echo -e "\[\e[30;102;1m\]0"; else echo -e "\[\e[97;101;1m\]$?"; fi)\[\e[0m\] \[\e[38;5;202m\]\w \[\e[0m\]'
 
-## Aliases
+
+
+######################################################################## Aliases
+
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
@@ -29,7 +33,6 @@ alias journal-clean='journalctl --vacuum-time=3d'
 alias l='eza -ahMl --smart-group --icons --time-style=long-iso --group-directories-first --color-scale --git-repos'
 alias ll='ls -lFah --group-directories-first --color=auto'
 alias mv='mv --verbose'
-# alias run-comfy='comfy launch'
 alias run-ngrok='ngrok start --all'
 alias run-syncthing='syncthing serve --no-browser --no-default-folder'
 alias scan-host='nmap -sP'
@@ -46,8 +49,11 @@ alias wget-all='wget --random-wait -r -p -e robots=off -U mozilla -o $HOME/wget_
 alias wget='wget -c'
 alias zombies='ps aux | awk '\''{if ($8=="Z") { print $2 }}'\'''
 
-## export vars
-# Terminal color codes
+
+
+####################################################################### Env vars
+
+# Terminal colors
 export PTCLR_CLEAR="\e[0;0m"
 export PTCLR_FG_BLUE="\e[1;34m"
 export PTCLR_FG_CYAN="\e[0;36m"
@@ -67,41 +73,50 @@ export PTCLR_BG_MAGENTA="\e[0;45m"
 export PTCLR_BG_RED="\e[0;41m"
 export PTCLR_BG_YELLOW="\e[0;43m"
 
-# Various
-export COMFYUI_PATH='/workspace/ComfyUI'
+# System
 export TZ='Europe/Berlin'
+export LANG='en_US.UTF-8'
+export LANGUAGE='en_US:en'
+export LC_ALL='en_US.UTF-8'
 
 # pip and uv settings
 export PIP_NO_CACHE_DIR='1'
 export UV_NO_CACHE='1'
 export PIP_CACHE_DIR='/workspace/.cache/pip'
 export UV_CACHE_DIR='/workspace/.cache/uv'
-export VIRTUALENV_OVERRIDE_APP_DATA='/workspace/.cache/virtualenv/'
 export PIP_DISABLE_PIP_VERSION_CHECK='1'
 export PIP_ROOT_USER_ACTION='ignore'
 
-# huggingface settings
+# Huggingface cache settings
 export HF_HOME='/workspace/.cache/huggingface/'
 export HF_DATASETS_CACHE='/workspace/.cache/huggingface/datasets/'
 export DEFAULT_HF_METRICS_CACHE='/workspace/.cache/huggingface/metrics/'
 export DEFAULT_HF_MODULES_CACHE='/workspace/.cache/huggingface/modules/'
 export HUGGINGFACE_HUB_CACHE='/workspace/.cache/huggingface/hub/'
 export HUGGINGFACE_ASSETS_CACHE='/workspace/.cache/huggingface/assets/'
-# Faster transfer of models from the hub to the container
+
+# Faster transfer of models from HF hub to the container
 export HF_HUB_ENABLE_HF_TRANSFER='1'
 
-# Set Default Python Version
+# Various software settings
 export PYTHON_VERSION='3.11'
+export COMFYUI_PATH='/workspace/ComfyUI'
 
 # Also need to re-export the secrets, because runpod names them weirdly
-export CIVITAI_API_KEY="$RUNPOD_SECRET_CAK"
-export FAL_KEY="$RUNPOD_SECRET_FAK"
-export HF_TOKEN="$RUNPOD_SECRET_HFT"
 export NGROK_AUTH_TOKEN="$RUNPOD_SECRET_NAT"
-export OPENROUTER_API_KEY="$RUNPOD_SECRET_OAK"
+export ZROK_TOKEN="$RUNPOD_SECRET_ZRT"
+export HF_TOKEN="$RUNPOD_SECRET_HFT"
+export CIVITAI_API_KEY="$RUNPOD_SECRET_CAK"
+export OPENROUTER_API_KEY="$RUNPOD_SECRET_ORK"
+export OPENAI_API_KEY="$RUNPOD_SECRET_OAK"
+export ANTHROPIC_API_KEY="$RUNPOD_SECRET_AAK"
+export FAL_KEY="$RUNPOD_SECRET_FAK"
 export REPLICATE_API_TOKEN="$RUNPOD_SECRET_RAT"
 
-## Functions
+
+
+####################################################################### Functions
+
 cecho() {
     # Makes printing colored messages easier. 1st arg: see below, rest is the message
     if [ "$#" -eq 1 ]; then
@@ -155,7 +170,7 @@ check-port() {
     cecho green '\nDone.'
 }
 
-aria_get() {
+aria-get() {
     # Uses aria2c to download a file from a URL
     if [ $# -eq 0 ]; then
         cecho red "\nUses aria2c to download a file from a URL\nUsage: fetch_url <url> [target_dir (current dir if not specified)]"
@@ -284,6 +299,26 @@ getaimodel() {
     return 0
 }
 
+get-repo-file() {
+    # Download specific files from the repo, e.g.:
+    # https://raw.githubusercontent.com/jtabox/kustom-kloud/main/scripts/extra.models.sh
+    local reponame
+    reponame="jtabox/kustom-kloud"
+    local branchname
+    branchname="main"
+    # Check how many args, if 2 then use arg2 as folder and filename for the output, otherwise assume the existing filename in current directory
+    local outputfile
+    if [ "$#" -ge 2 ]; then
+        outputfile="$2"
+    else
+        outputfile="./"$(basename "$1")
+    fi
+    cecho cyan "\n::::> Fetching $reponame/$branchname/$1 to $outputfile"
+    wget -qO "$outputfile" "https://raw.githubusercontent.com/$reponame/$branchname/$1" &&
+        chown root:root "$outputfile" &&
+        cecho green "Done"
+}
+
 hrep() {
     # history grep
     history | GREP_COLORS="mt=1;37;41" LANG=C grep --color=auto -i "$@"
@@ -307,6 +342,131 @@ path-remove() {
     fi
 }
 
+print-header() {
+    # Overly complicated header printer
+    # Usage: print_header <'type'> (always) <'main_text'> or <'text_line1'> <'text_line2'> ['text_line3']
+    local type="$1"
+    shift
+    local color_code
+
+    case "$type" in
+    "success") color_code="$PTCLR_FG_GREEN" ;;
+    "warn") color_code="$PTCLR_FG_YELLOW" ;;
+    "error") color_code="$PTCLR_FG_RED" ;;
+    "info") color_code="$PTCLR_FG_CYAN" ;;
+    *) color_code="$PTCLR_FG_CYAN" ;;
+    esac
+
+    local term_width
+    term_width=$(tput cols)
+    local text_count=$#
+
+    # One text argument
+    if [ $text_count -eq 1 ]; then
+        local text="$1"
+        if [ ${#text} -gt "$term_width" ]; then
+            echo -e "\n${color_code}${text}${PTCLR_CLEAR}\n"
+            return
+        fi
+
+        local text_line="::::: ${text} :::::"
+        local border_line
+        border_line=$(printf ':%.0s' $(seq 1 ${#text_line}))
+
+        echo -e "\n\n${color_code}${border_line}"
+        echo -e "${text_line}"
+        echo -e "${border_line}${PTCLR_CLEAR}\n\n"
+        return
+    fi
+
+    # Multiple text args (2 or 3 texts)
+    local header_text="$1"
+    local middle_text="$2"
+    local footer_text="$3"
+
+    local middle_line="::::: ${middle_text} :::::"
+    local total_length=${#middle_line}
+    local border_line
+    border_line=$(printf ':%.0s' $(seq 1 "$total_length"))
+
+    local header_line="::::: ${header_text}"
+    local header_padding
+    header_padding=$(printf ':%.0s' $(seq 1 $((total_length - ${#header_line} - 1))))
+    local header_line="${header_line} ${header_padding}"
+
+    echo -e "\n\n\033[${color_code}m${border_line}"
+    echo -e "${header_line}"
+    echo -e "${middle_line}"
+
+    if [ $text_count -eq 3 ]; then
+        local footer_line="::::: ${footer_text}"
+        local footer_padding
+        footer_padding=$(printf ':%.0s' $(seq 1 $((total_length - ${#footer_line} - 1))))
+        local footer_line="${footer_line} ${footer_padding}"
+        echo -e "${footer_line}"
+    fi
+
+    echo -e "${border_line}${PTCLR_CLEAR}\n\n"
+}
+
+replace-in-file-aux() {
+    # Helper function for replace_in_file, does the replacing for a single file
+    local filename="$1"
+    local old_str="$2"
+    local new_str="$3"
+
+    if [ ! -f "$filename" ]; then
+        cecho red "Error: File '$filename' not found"
+        return 1
+    fi
+
+    if [ -n "$new_str" ]; then
+        sed -i "s|${old_str}|${new_str}|g" "$filename"
+    else
+        sed -i "s|${old_str}||g" "$filename"
+    fi
+
+    if [ $? -eq 0 ]; then
+        cecho green "Processed: $filename"
+        return 0
+    else
+        cecho red "Error: Failed to modify $filename"
+        return 1
+    fi
+}
+
+replace-in-file() {
+    # Replaces a string in a file or all files in a directory
+    if [ "$#" -lt 2 ] || [ "$#" -gt 3 ]; then
+        cecho red "Usage: replace_in_file <filename|directory> <str_to_be_replaced> [str_to_replace_with]"
+        return 1
+    fi
+
+    local target="$1"
+    local old_str="$2"
+    local new_str="$3"
+
+    # Handle directory case
+    if [ -d "$target" ]; then
+        cecho yellow "Warning: '$target' is a directory!"
+        read -p "Do you want to process all files in this directory? (y/N): " confirm
+        if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+            cecho red "Operation cancelled"
+            return 0
+        fi
+
+        for file in "$target"/*; do
+            if [ -f "$file" ]; then
+                replace-in-file-aux "$file" "$old_str" "$new_str"
+            fi
+        done
+        return 0
+    fi
+
+    # Handle single file case
+    replace-in-file-aux "$target" "$old_str" "$new_str"
+}
+
 subst-in-file() {
     # Substitutes a string in a file
     [ "$#" -ne 3 ] && cecho red "\nSubstitutes a string in a file\nUsage: subst-in-file <the file> <find what> <replace with>" && return 1
@@ -327,9 +487,9 @@ whereis() {
     fi
 }
 
-install_multiple_nodes() {
+install-nodes-from-list() {
     # Installs multiple nodes from a file containing an array with node repo urls
-    cecho cyan "\n\n::::::::::::::::::::::::::::::::::::::::::::\n::::: ComfyUI Nodes Install From File  :::::\n::::::::::::::::::::::::::::::::::::::::::::\n\n"
+    print_header 'info' 'ComfyUI Nodes Batch Install'
 
     if [ -z "$1" ]; then
         cecho red "\n:: Usage: install_multiple_nodes <file_with_nodes>"
@@ -368,12 +528,12 @@ install_multiple_nodes() {
         cecho orange "\n:: Running command for group $((i + 1)) of $NUM_GROUPS ..."
         $nodes_command
     done
-    cecho green "\n\n:::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n::::: Finished processing all the nodes in the file :::::\n:::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n\n"
+    print_header 'success' 'Finished processing all the nodes in the file'
 }
 
-download_multiple_models() {
+download-models-from-list() {
     # Downloads multiple models from a file containing an array with model urls
-    cecho cyan "\n\n::::::::::::::::::::::::::::::::::::::::::::::\n::::: ComfyUI Models Download From File  :::::\n::::::::::::::::::::::::::::::::::::::::::::::\n\n"
+    print_header 'ComfyUI Models Batch Download'
 
     if [ -z "$1" ]; then
         cecho red "\n:: Usage: download_multiple_models <file_with_models>"
@@ -434,7 +594,7 @@ download_multiple_models() {
         getaimodel "$file_url" inc
         ((other_counter++))
     done
-    cecho green "\n\n::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n::::: Finished processing all the models in the file :::::\n::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n\n"
+    print_header 'success' 'Finished processing all the models in the file'
 }
 
 run-comfy() {
@@ -444,13 +604,11 @@ run-comfy() {
     python main.py
 }
 
-## misc
-# those two are used in other scripts too
 export -f cecho
-export -f aria_get
+export -f aria-get
 export -f getaimodel
-export -f install_multiple_nodes
-export -f download_multiple_models
+export -f install-nodes-from-list
+export -f download-models-from-list
 
 # add some paths
 path-add /root/.local/bin
