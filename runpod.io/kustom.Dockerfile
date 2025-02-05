@@ -10,11 +10,16 @@ FROM ${STARTERIMAGE} AS base
 
 SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
 
-ENV SHELL="/bin/bash"
-ENV PYTHONUNBUFFERED="True"
-ENV DEBIAN_FRONTEND="noninteractive"
-ENV LANG="C.UTF-8"
-ENV LC_ALL="C.UTF-8"
+# Set environment variables
+ENV SHELL="/bin/bash" \
+    PYTHONUNBUFFERED="True" \
+    DEBIAN_FRONTEND="noninteractive" \
+    LANG="C.UTF-8" \
+    LC_ALL="C.UTF-8" \
+    PIP_CACHE_DIR='/workspace/.cache/pip' \
+    PIP_NO_CACHE_DIR='1' \
+    PIP_ROOT_USER_ACTION='ignore' \
+    PIP_DISABLE_PIP_VERSION_CHECK='1'
 
 WORKDIR /
 
@@ -72,24 +77,22 @@ RUN apt-get update && \
         make \
         zlib1g-dev && \
     add-apt-repository ppa:deadsnakes/ppa && \
+    mkdir -p /etc/apt/keyrings && \
+    wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | gpg --dearmor -o /etc/apt/keyrings/gierens.gpg && \
+    echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | tee /etc/apt/sources.list.d/gierens.list && \
+    chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list && \
+    curl -sSL https://ngrok-agent.s3.amazonaws.com/ngrok.asc | tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null && \
+    echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | tee /etc/apt/sources.list.d/ngrok.list && \
+    curl -Lo /etc/apt/keyrings/syncthing-archive-keyring.gpg https://syncthing.net/release-key.gpg && \
+    echo "deb [signed-by=/etc/apt/keyrings/syncthing-archive-keyring.gpg] https://apt.syncthing.net/ syncthing stable" | tee /etc/apt/sources.list.d/syncthing.list && \
+    curl -sSLf https://get.openziti.io/tun/package-repos.gpg | gpg --dearmor --output /usr/share/keyrings/openziti.gpg && \
+    chmod a+r /usr/share/keyrings/openziti.gpg && \
+    echo "deb [signed-by=/usr/share/keyrings/openziti.gpg] https://packages.openziti.org/zitipax-openziti-deb-stable debian main" | tee /etc/apt/sources.list.d/openziti-release.list >/dev/null && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
         python3.11-dev \
         python3.11-venv \
-        python3.11-distutils && \
-    mkdir -p /etc/apt/keyrings && \
-    wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | gpg --dearmor -o /etc/apt/keyrings/gierens.gpg && \
-        echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | tee /etc/apt/sources.list.d/gierens.list && \
-        chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list && \
-    curl -sSL https://ngrok-agent.s3.amazonaws.com/ngrok.asc | tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null && \
-        echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | tee /etc/apt/sources.list.d/ngrok.list && \
-    curl -Lo /etc/apt/keyrings/syncthing-archive-keyring.gpg https://syncthing.net/release-key.gpg && \
-        echo "deb [signed-by=/etc/apt/keyrings/syncthing-archive-keyring.gpg] https://apt.syncthing.net/ syncthing stable" | tee /etc/apt/sources.list.d/syncthing.list && \
-    curl -sSLf https://get.openziti.io/tun/package-repos.gpg | gpg --dearmor --output /usr/share/keyrings/openziti.gpg && \
-        chmod a+r /usr/share/keyrings/openziti.gpg && \
-        echo "deb [signed-by=/usr/share/keyrings/openziti.gpg] https://packages.openziti.org/zitipax-openziti-deb-stable debian main" | tee /etc/apt/sources.list.d/openziti-release.list >/dev/null && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends \
+        python3.11-distutils \
         eza \
         ngrok \
         syncthing \
@@ -99,17 +102,16 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
 
-# Some more
+# Install additional tools and Python packages
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
-        python3.11 get-pip.py && \
-        rm get-pip.py && \
+    python3.11 get-pip.py && \
+    rm get-pip.py && \
     python3.11 -m pip install --upgrade pip && \
     wget https://github.com/sharkdp/bat/releases/download/v${BATVERSION}/bat_${BATVERSION}_amd64.deb && \
-        dpkg -i bat_${BATVERSION}_amd64.deb && \
-        rm bat_${BATVERSION}_amd64.deb && \
+    dpkg -i bat_${BATVERSION}_amd64.deb && \
+    rm bat_${BATVERSION}_amd64.deb && \
     curl -LO https://github.com/BurntSushi/ripgrep/releases/download/${RIPGREPVERSION}/ripgrep_${RIPGREPVERSION}-1_amd64.deb && \
-        dpkg -i ripgrep_${RIPGREPVERSION}-1_amd64.deb && \
-        rm ripgrep_${RIPGREPVERSION}-1_amd64.deb && \
+    dpkg -i ripgrep_${RIPGREPVERSION}-1_amd64.deb && \
+    rm ripgrep_${RIPGREPVERSION}-1_amd64.deb && \
     curl -LsSf https://astral.sh/uv/install.sh | env UV_UNMANAGED_INSTALL="~/.local/bin" sh && \
     rm -rf /tmp/* /var/tmp/*
-

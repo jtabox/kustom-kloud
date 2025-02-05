@@ -1,106 +1,180 @@
 #!/bin/bash
 # shellcheck disable=SC1091
-# This script is called from the Dockerfile as the last step
+# This script is called from the Dockerfile towards the end of the build process and is responsible for checking/initializing the /workspace storage mount
 
 # Exit on error, pipefail
 set -eo pipefail
 
-# Check what exists
+# overly complicated header printer
+print_header() {
+    # usage: print_header <'type'> (always) <'main_text'> or <'text_line1'> <'text_line2'> ['text_line3']
+    local type="$1"
+    shift
+    local color_code
+
+    case "$type" in
+    "success") color_code="32" ;;
+    "warn") color_code="33" ;;
+    "error") color_code="31" ;;
+    "info") color_code="36" ;;
+    *) color_code="36" ;;
+    esac
+
+    local term_width
+    term_width=$(tput cols)
+    local text_count=$#
+
+    # If only one text, use original behavior
+    if [ $text_count -eq 1 ]; then
+        local text="$1"
+        if [ ${#text} -gt "$term_width" ]; then
+            echo -e "\n\033[${color_code}m${text}\033[0m\n"
+            return
+        fi
+
+        local text_line="::::: ${text} :::::"
+        local border_line
+        border_line=$(printf ':%.0s' $(seq 1 ${#text_line}))
+
+        echo -e "\n\n\033[${color_code}m${border_line}"
+        echo -e "${text_line}"
+        echo -e "${border_line}\033[0m\n\n"
+        return
+    fi
+
+    # Multiple text handling (2 or 3 texts)
+    local header_text="$1"
+    local middle_text="$2"
+    local footer_text="$3"
+
+    local middle_line="::::: ${middle_text} :::::"
+    local total_length=${#middle_line}
+    local border_line
+    border_line=$(printf ':%.0s' $(seq 1 "$total_length"))
+
+    local header_line="::::: ${header_text}"
+    local header_padding
+    header_padding=$(printf ':%.0s' $(seq 1 $((total_length - ${#header_line} - 1))))
+    local header_line="${header_line} ${header_padding}"
+
+    echo -e "\n\n\033[${color_code}m${border_line}"
+    echo -e "${header_line}"
+    echo -e "${middle_line}"
+
+    if [ $text_count -eq 3 ]; then
+        local footer_line="::::: ${footer_text}"
+        local footer_padding
+        footer_padding=$(printf ':%.0s' $(seq 1 $((total_length - ${#footer_line} - 1))))
+        local footer_line="${footer_line} ${footer_padding}"
+        echo -e "${footer_line}"
+    fi
+
+    echo -e "${border_line}\033[0m\n\n"
+}
+
+# Check if workspace even exists in the first place
 if [ ! -d "/workspace" ]; then
-    echo -e "\nFatal error:\nA /workspace directory can't be found, make sure a volume is mounted there. Exiting ...\n"
+    print_header 'error' 'Fatal error!' 'The /workspace directory can not be found! Is the storage volume mounted?' 'Exiting ...'
     exit 1
 fi
 
 if [ -f "/workspace/_INSTALL_COMPLETE" ]; then
-    # This isn't the first time install
-    echo -e "\n\n::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
-    echo -e "::::: Found existing installation in /workspace, will only adjust existing files :::::"
-    echo -e "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n\n"
+    # This is created after the first time a fresh volume is initialized
+    print_header 'info' 'The /workspace folder seems already initialized. Will only adjust specific files as needed.'
     FIRST_TIME_INSTALL=0
 else
-    echo -e "\n\n::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
-    echo -e "::::: No existing installation was found, proceeding with first time setup :::::"
-    echo -e "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n\n"
+    print_header 'info' 'The /workspace folder has not been initialized. Executing first-time setup.'
     FIRST_TIME_INSTALL=1
 fi
 
-# Move root home, python 3.11 installs and /usr/local/bin to /workspace for permanence, if it's the first time, otherwise just link
-
-# Stop jupyter server if it's running, since we'll be moving /usr/local/bin where the jupyter binary is
-echo ":: Stopping any running Jupyter server"
-jupyter server stop || true
+# The /root, /usr/local/lib/python3.11 installation and /usr/local/bin (has many python executables) will be storaged in /workspace for permanence.
+# They are moved (with any existing contents) if it's the first-time setup, and links are created to the original location.
+# Otherwise they are deleted and only links are created.
 
 if [ $FIRST_TIME_INSTALL -eq 1 ]; then
-    echo ":: Moving /root, /usr/local/lib/python3.11 and /usr/local/bin to /workspace"
-    # /root
-    mv /root /workspace
-    # Python 3.11
-    mkdir -p /workspace/usrlocallib &&
-        chmod 755 /workspace/usrlocallib &&
-        mv /usr/local/lib/python3.11 /workspace/usrlocallib
-    # usr/local/bin too, since many python packages install binaries there
-    mkdir -p /workspace/usrlocalbin &&
-        chmod 755 /workspace/usrlocalbin &&
-        mv /usr/local/bin /workspace/usrlocalbin
+    echo "::::> Moving /root, /usr/local/lib/python3.11 and /usr/local/bin to /workspace"
+    mkdir -p /workspace/containerdirs &&
+        chmod 755 /workspace/containerdirs
+    # /root -> /workspace/containerdirs/root
+    mv /root /workspace/containerdirs/root
+    # python3.11 -> /workspace/containerdirs/usrlocallib_py311
+    mv /usr/local/lib/python3.11 /workspace/containerdirs/usrlocallib_py311
+    # usr/local/bin -> /workspace/containerdirs/usrlocalbin
+    mv /usr/local/bin /workspace/containerdirs/usrlocalbin
 else
-    # Just remove the current versions, they'll be linked to the /workspace versions
-    echo ":: Removing /root, /usr/local/lib/python3.11 and /usr/local/bin"
+    echo "::::> Removing /root, /usr/local/lib/python3.11 and /usr/local/bin"
     rm -rf /root
     rm -rf /usr/local/lib/python3.11
     rm -rf /usr/local/bin
 fi
-echo ":: Linking /root, /usr/local/lib/python3.11 and /usr/local/bin to their /workspace folders"
-ln -s /workspace/root /root
-ln -s /workspace/usrlocallib/python3.11 /usr/local/lib
-ln -s /workspace/usrlocalbin/bin /usr/local
 
+echo "::::> Linking /root, /usr/local/lib/python3.11 and /usr/local/bin to their workspace counterparts"
+ln -s /workspace/containerdirs/root /root
+ln -s /workspace/containerdirs/usrlocallib_py311 /usr/local/lib/python3.11
+ln -s /workspace/containerdirs/usrlocalbin /usr/local/bin
 
-get_repo_file() {
-    echo -e "\n:: Fetching: $1"
-    wget -q "https://raw.githubusercontent.com/jtabox/kustom-kloud/megascript-v2/$1" || exit 1
-    filename=$(basename "$1")
-    chown root:root "$filename" || exit 1
-    #if a second arg is passed, make the file executable
-    if [ "$#" -ge 2 ]; then
-        chmod +x "$filename"
+for linked_dir in "/root" "/usr/local/lib/python3.11" "/usr/local/bin"; do
+    if [ ! -L "$linked_dir" ]; then
+        echo "!! Error !! $linked_dir is not a symbolic link!"
+        exit 1
     fi
+    if ! (cd "$linked_dir" 2>/dev/null); then
+        echo "!! Error !! $linked_dir can't be accessed!"
+        exit 1
+    fi
+done
+
+# Function to fetch files from the repo (though gotta check if i can fetch them from /workspace or while building the image from the repo)
+# https://raw.githubusercontent.com/jtabox/kustom-kloud/main/common/configs/comfy-session.screenrc
+# https://raw.githubusercontent.com/jtabox/kustom-kloud/main/runpod.io/root.bash_aliases.sh
+get_repo_file() {
+    local reponame
+    reponame="jtabox/kustom-kloud"
+    local branchname
+    branchname="main"
+    # Check how many args, if 2 then use arg2 as folder and filename for the output, otherwise assume the existing filename in current directory
+    local outputfile
+    if [ "$#" -ge 2 ]; then
+        outputfile="$2"
+    else
+        outputfile="./"$(basename "$1")
+    fi
+    echo -e "\n::::> Fetching $reponame/$branchname/$1 to $outputfile"
+    wget -qO "$outputfile" "https://raw.githubusercontent.com/$reponame/$branchname/$1" &&
+        chown root:root "$outputfile" &&
+        echo "Done"
 }
 
-if [ $FIRST_TIME_INSTALL -eq 1 ]; then
-    echo -e "\n\n::::::::::::::::::::::::::::::::::::::::::::\n::::: Starting files and folders setup :::::\n::::::::::::::::::::::::::::::::::::::::::::\n\n"
+cd /root
 
-    # Shush
+if [ $FIRST_TIME_INSTALL -eq 1 ]; then
+    print_header 'info' 'Starting files and folders setup'
+
+    # stfu motd
     touch /root/.hushlogin
 
-    # Fetch some files
-    cd /root || exit 1
+    get_repo_file "runpod.io/root.bash_aliases.sh" "/root/.bash_aliases" &&
+        source /root/.bash_aliases
 
-    echo -e "\n:: Fetching: .bash_aliases"
-    wget -qO .bash_aliases https://raw.githubusercontent.com/jtabox/kustom-kloud/megascript-v2/runpod.io/root.bash_aliases.sh &&
-        chown root:root .bash_aliases &&
-        source .bash_aliases
-
-    cecho cyan "\n:: Fetching: nano config files"
-    wget -q https://raw.githubusercontent.com/jtabox/kustom-kloud/megascript-v2/common/configs/nano-conf.tgz &&
+    get_repo_file "common/configs/nano-conf.tgz" &&
         tar -xzf nano-conf.tgz -C /root/ &&
-        rm nano-conf.tgz &&
+        rm /root/nano-conf.tgz &&
         chown -R root:root /root/.nanorc /root/.nano
 
-    cecho cyan "\n:: Fetching: comfy download lists"
     get_repo_file "common/scripts/comfy.nodes"
     get_repo_file "common/scripts/comfy.models"
     get_repo_file "common/scripts/extra.models"
 
-    cecho cyan "\n:: Fetching: screen and comfy config files"
     get_repo_file "common/configs/.screenrc"
     get_repo_file "common/configs/comfy-session.screenrc"
     get_repo_file "common/configs/comfy.settings.json"
     get_repo_file "common/configs/comfy.templates.json"
     get_repo_file "common/configs/mgr.config.ini"
 
-    cecho green "\n\n:::::::::::::::::::::::::::::::::::::::::::::::::\n::::: Finished setting up files and folders :::::\n:::::::::::::::::::::::::::::::::::::::::::::::::\n\n"
+    print_header 'success' 'Finished setting up files and folders'
 
-    cecho cyan "\n\n:::::::::::::::::::::::::::::::\n::::: Installing ComfyUI  :::::\n:::::::::::::::::::::::::::::::\n\n"
+    print_header 'info' 'Installing ComfyUI and Manager'
+
     cd /workspace
 
     git clone https://github.com/comfyanonymous/ComfyUI.git &&
@@ -108,10 +182,10 @@ if [ $FIRST_TIME_INSTALL -eq 1 ]; then
         git clone https://github.com/ltdrdata/ComfyUI-Manager.git &&
         cecho green "ComfyUI and Manager cloned successfully"
 
-    # Some extra packages (torch v2.4.1+cu124 is already installed, has to be locked otherwise xformers will install a different version)
+    # Install comfy
     python -m pip install --upgrade pip
+    pip install torch==2.5.1+cu124 torchvision torchaudio xformers --index-url https://download.pytorch.org/whl/cu124
     pip install --no-build-isolation flash-attn
-    pip install xformers torch==2.4.1+cu124 --index-url https://download.pytorch.org/whl/cu124
     pip install -r /workspace/ComfyUI/requirements.txt &&
         pip install -r /workspace/ComfyUI/custom_nodes/ComfyUI-Manager/requirements.txt &&
         pip install comfy-cli
