@@ -127,8 +127,8 @@ WORKDIR /
 
 COPY --chown=root:root scripts /tmp/repofiles/scripts
 COPY --chown=root:root configs /tmp/repofiles/configs
-COPY --chown=root:root scripts/kustom.prepare_workspace.sh /starter.sh
-RUN chmod +x scripts/*
+COPY --chown=root:root scripts/kustom.init_script.sh /starter.sh
+RUN chmod +x /tmp/repofiles/scripts/*
 RUN chmod +x /starter.sh
 
 # Do I expose the ports here?
