@@ -36,6 +36,7 @@ jobs:
         uses: docker/build-push-action@v6.13.0
         with:
           context: .  # Build context is the current directory
+          file: ./kustom.Dockerfile
           push: true   # Push the image to the registry
           tags: ghcr.io/${{ github.repository_owner }}/kustom-kloud:rp.io # Replace with your image name
           cache-from: type=local,src=/tmp/.buildx-cache # Use the cache
