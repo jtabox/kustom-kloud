@@ -75,9 +75,6 @@ export PTCLR_BG_YELLOW="\e[0;43m"
 
 # System
 export TZ='Europe/Berlin'
-export LANG='en_US.UTF-8'
-export LANGUAGE='en_US:en'
-export LC_ALL='en_US.UTF-8'
 
 # pip and uv settings
 export PIP_NO_CACHE_DIR='1'
@@ -358,7 +355,8 @@ print-header() {
     esac
 
     local term_width
-    term_width=$(tput cols)
+    # The following tput fails when run in docker/a script, so we use a fallback
+    term_width=$(tput cols 2>/dev/null || echo 80)
     local text_count=$#
 
     # One text argument

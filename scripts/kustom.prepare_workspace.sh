@@ -66,30 +66,30 @@ print-header 'info' 'Moving repo files to their correct locations'
 # Move all the repo files from /tmp them to their correct locations always
 cd /root
 
-mv  /tmp/repofiles/scripts/rp_root.bash_aliases.sh /root/.bash_aliases &&
+cp  /tmp/repofiles/scripts/rp_root.bash_aliases.sh /root/.bash_aliases &&
     source /root/.bash_aliases
 
-mv /tmp/repofiles/configs/nano-conf.tgz /root/ &&
+cp /tmp/repofiles/configs/nano-conf.tgz /root/ &&
     tar -xzf nano-conf.tgz -C /root/ &&
     rm nano-conf.tgz &&
     chown -R root:root /root/.nanorc /root/.nano
 
 mkdir -p /root/download-lists &&
-    mv /tmp/repofiles/scripts/*.nodes.sh /root/download-lists &&
-    mv /tmp/repofiles/scripts/*.models.sh /root/download-lists
+    cp /tmp/repofiles/scripts/*.nodes.sh /root/download-lists &&
+    cp /tmp/repofiles/scripts/*.models.sh /root/download-lists
 
 mkdir -p /root/container-scripts &&
-    mv /tmp/repofiles/scripts/kustom.*.sh /root/container-scripts
+    cp /tmp/repofiles/scripts/kustom.*.sh /root/container-scripts
 
-mv /tmp/repofiles/configs/.screenrc /root/
-mv /tmp/repofiles/configs/*.screenrc /root/
+cp /tmp/repofiles/configs/.screenrc /root/
+cp /tmp/repofiles/configs/*.screenrc /root/
 
-mv /tmp/repofiles/configs/comfy.*.json /root/
-mv /tmp/repofiles/configs/*.config.ini /root/
-mv /tmp/repofiles/configs/ngrok-config.yml /root/
+cp /tmp/repofiles/configs/comfy.*.json /root/
+cp /tmp/repofiles/configs/*.config.ini /root/
+cp /tmp/repofiles/configs/ngrok-config.yml /root/
 
 # Delete any leftovers for good measure
-rm -rf /tmp/repofiles
+# rm -rf /tmp/repofiles
 
 print-header 'success' 'Repo files moved successfully'
 
@@ -106,6 +106,7 @@ if [ $FIRST_TIME_INSTALL -eq 1 ]; then
         git clone https://github.com/ltdrdata/ComfyUI-Manager.git &&
         cecho green "ComfyUI and Manager cloned successfully"
 
+
     # Install main python packages and comfy
     python -m pip install --upgrade pip
     pip install torch==2.5.1+cu124 torchvision torchaudio xformers --index-url https://download.pytorch.org/whl/cu124
@@ -113,11 +114,11 @@ if [ $FIRST_TIME_INSTALL -eq 1 ]; then
     pip install -r /workspace/ComfyUI/requirements.txt &&
         pip install -r /workspace/ComfyUI/custom_nodes/ComfyUI-Manager/requirements.txt &&
         pip install comfy-cli
-
+    COMFYUI_PATH="/workspace/ComfyUI"
     mkdir -p "$COMFYUI_PATH"/user/default/ComfyUI-Manager
     mv /root/comfy.settings.json /root/comfy.templates.json "$COMFYUI_PATH"/user/default
-    cp /root/mgr.config.ini "$COMFYUI_PATH"/custom_nodes/ComfyUI-Manager/config.ini
-    mv /root/mgr.config.ini "$COMFYUI_PATH"/user/default/ComfyUI-Manager/config.ini
+    cp /root/comfy-manager.config.ini "$COMFYUI_PATH"/custom_nodes/ComfyUI-Manager/config.ini
+    mv /root/comfy-manager.config.ini "$COMFYUI_PATH"/user/default/ComfyUI-Manager/config.ini
 
     mkdir -p "/root/.config/comfy-cli"
     replace-in-file "/root/comfy-cli.config.ini" "__COMFYUI_PATH__" "$COMFYUI_PATH"
@@ -126,7 +127,7 @@ if [ $FIRST_TIME_INSTALL -eq 1 ]; then
     print-header 'success' 'ComfyUI & Manager installation completed successfully'
 
     print-header 'info' 'Creating zrok, ngrok & SyncThing configurations'
-
+    NGROK_AUTH_TOKEN="its whatever"
     if [ -z "$NGROK_AUTH_TOKEN" ]; then
         cecho red "NGROK_AUTH_TOKEN must be set in order to write ngrok's configuration!"
         exit 1
@@ -159,3 +160,45 @@ if [ $FIRST_TIME_INSTALL -eq 1 ]; then
 fi
 
 print-header 'success' '/workspace initialization completed successfully'
+
+# Setup ssh
+if [[ $PUBLIC_KEY ]]; then
+    cecho cyan "Setting up SSH..."
+    mkdir -p ~/.ssh
+    echo "$PUBLIC_KEY" >> ~/.ssh/authorized_keys
+    chmod 700 -R ~/.ssh
+     if [ ! -f /etc/ssh/ssh_host_rsa_key ]; then
+        ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -q -N ''
+        echo "RSA key fingerprint:"
+        ssh-keygen -lf /etc/ssh/ssh_host_rsa_key.pub
+    fi
+    if [ ! -f /etc/ssh/ssh_host_dsa_key ]; then
+        ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key -q -N ''
+        echo "DSA key fingerprint:"
+        ssh-keygen -lf /etc/ssh/ssh_host_dsa_key.pub
+    fi
+    if [ ! -f /etc/ssh/ssh_host_ecdsa_key ]; then
+        ssh-keygen -t ecdsa -f /etc/ssh/ssh_host_ecdsa_key -q -N ''
+        echo "ECDSA key fingerprint:"
+        ssh-keygen -lf /etc/ssh/ssh_host_ecdsa_key.pub
+    fi
+    if [ ! -f /etc/ssh/ssh_host_ed25519_key ]; then
+        ssh-keygen -t ed25519 -f /etc/ssh/ssh_host_ed25519_key -q -N ''
+        echo "ED25519 key fingerprint:"
+        ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
+    fi
+    service ssh start
+    echo "SSH host keys:"
+    for key in /etc/ssh/*.pub; do
+        echo "Key: $key"
+        ssh-keygen -lf "$key"
+    done
+fi
+
+# Export runpod env vars (not really sure why)
+cecho cyan "Exporting environment variables..."
+printenv | grep -E '^RUNPOD_|^PATH=|^_=' | awk -F = '{ print "export " $1 "=\"" $2 "\"" }' >> /root/rp.io_envs.sh
+echo 'source /root/rp.io_envs.sh' >> ~/.bashrc
+
+
+sleep infinity

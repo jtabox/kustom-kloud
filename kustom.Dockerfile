@@ -5,10 +5,11 @@ ARG RELEASETYPE="cudnn-devel"
 ARG UBUNTUVERSION="22.04"
 ARG STARTERIMAGE="nvcr.io/nvidia/cuda:${CUDAVERSION}-${RELEASETYPE}-ubuntu${UBUNTUVERSION}"
 
+FROM ${STARTERIMAGE} AS base
+
 ARG BATVERSION="0.25.0"
 ARG RIPGREPVERSION="14.1.1"
-
-FROM ${STARTERIMAGE} AS base
+ARG PYTHON_VERSION="3.11"
 
 SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
 
@@ -77,7 +78,6 @@ RUN apt-get update && \
         libssl-dev \
         make \
         zlib1g-dev && \
-    add-apt-repository ppa:deadsnakes/ppa && \
     mkdir -p /etc/apt/keyrings && \
     wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | gpg --dearmor -o /etc/apt/keyrings/gierens.gpg && \
     echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | tee /etc/apt/sources.list.d/gierens.list && \
@@ -91,30 +91,35 @@ RUN apt-get update && \
     echo "deb [signed-by=/usr/share/keyrings/openziti.gpg] https://packages.openziti.org/zitipax-openziti-deb-stable debian main" | tee /etc/apt/sources.list.d/openziti-release.list >/dev/null && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
-        python3.11-dev \
-        python3.11-venv \
-        python3.11-distutils \
         eza \
         ngrok \
         syncthing \
-        zrok && \
+        zrok
+
+# Python 3.11
+RUN if [ -n "${PYTHON_VERSION}" ]; then \
+        add-apt-repository ppa:deadsnakes/ppa && \
+        apt-get install "python${PYTHON_VERSION}-dev" "python${PYTHON_VERSION}-venv" -y --no-install-recommends && \
+        ln -s /usr/bin/python${PYTHON_VERSION} /usr/bin/python && \
+        rm /usr/bin/python3 && \
+        ln -s /usr/bin/python${PYTHON_VERSION} /usr/bin/python3 && \
+        curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
+        python get-pip.py && \
+        pip install --upgrade --no-cache-dir pip; \
+    fi && \
     apt-get autoremove -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
 
-# Install additional tools and Python packages
-RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
-    python3.11 get-pip.py && \
-    rm get-pip.py && \
-    python3.11 -m pip install --upgrade pip && \
-    wget https://github.com/sharkdp/bat/releases/download/v${BATVERSION}/bat_${BATVERSION}_amd64.deb && \
-    dpkg -i bat_${BATVERSION}_amd64.deb && \
-    rm bat_${BATVERSION}_amd64.deb && \
-    curl -LO https://github.com/BurntSushi/ripgrep/releases/download/${RIPGREPVERSION}/ripgrep_${RIPGREPVERSION}-1_amd64.deb && \
-    dpkg -i ripgrep_${RIPGREPVERSION}-1_amd64.deb && \
-    rm ripgrep_${RIPGREPVERSION}-1_amd64.deb && \
-    curl -LsSf https://astral.sh/uv/install.sh | env UV_UNMANAGED_INSTALL="~/.local/bin" sh && \
+# Additional tools
+RUN wget https://github.com/sharkdp/bat/releases/download/v"${BATVERSION}"/bat_"${BATVERSION}"_amd64.deb && \
+    dpkg -i bat_"${BATVERSION}"_amd64.deb && \
+    rm bat_"${BATVERSION}"_amd64.deb && \
+    curl -LO https://github.com/BurntSushi/ripgrep/releases/download/"${RIPGREPVERSION}"/ripgrep_"${RIPGREPVERSION}"-1_amd64.deb && \
+    dpkg -i ripgrep_"${RIPGREPVERSION}"-1_amd64.deb && \
+    rm ripgrep_"${RIPGREPVERSION}"-1_amd64.deb && \
+    curl -LsSf https://astral.sh/uv/install.sh | env UV_UNMANAGED_INSTALL="/root/.local/bin" sh && \
     rm -rf /tmp/* /var/tmp/*
 
 # Make scripts and configs available to be used
@@ -122,14 +127,9 @@ WORKDIR /tmp/repofiles
 
 COPY --chown=root:root scripts /tmp/repofiles/scripts
 COPY --chown=root:root configs /tmp/repofiles/configs
-
+COPY --chown=root:root scripts/kustom.prepare_workspace.sh /starter.sh
 RUN chmod +x scripts/*
-
-# Run the script to prepare /workspace
-RUN /tmp/repofiles/scripts/kustom.prepare_workspace.sh
-
-# Run the start script
-WORKDIR /root
+RUN chmod +x /starter.sh
 
 # Do I expose the ports here?
 # HTTP ports:
@@ -138,4 +138,6 @@ EXPOSE 7667 8778 9889 54638
 EXPOSE 22 6556 5445 41648
 
 # Start the container
-CMD [ "./scripts/kustom.container_start.sh" ]
+ENTRYPOINT ["/bin/bash", "-c", "exec /starter.sh"]
+# CMD ["/starter.sh"]
+# ENTRYPOINT ["/starter.sh"]
