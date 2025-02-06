@@ -123,7 +123,7 @@ RUN wget https://github.com/sharkdp/bat/releases/download/v"${BATVERSION}"/bat_"
     rm -rf /tmp/* /var/tmp/*
 
 # Make scripts and configs available to be used
-WORKDIR /tmp/repofiles
+WORKDIR /
 
 COPY --chown=root:root scripts /tmp/repofiles/scripts
 COPY --chown=root:root configs /tmp/repofiles/configs
@@ -139,5 +139,3 @@ EXPOSE 22 6556 5445 41648
 
 # Start the container
 ENTRYPOINT ["/bin/bash", "-c", "exec /starter.sh"]
-# CMD ["/starter.sh"]
-# ENTRYPOINT ["/starter.sh"]

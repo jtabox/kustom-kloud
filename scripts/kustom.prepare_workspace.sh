@@ -114,7 +114,7 @@ if [ $FIRST_TIME_INSTALL -eq 1 ]; then
     pip install -r /workspace/ComfyUI/requirements.txt &&
         pip install -r /workspace/ComfyUI/custom_nodes/ComfyUI-Manager/requirements.txt &&
         pip install comfy-cli
-    COMFYUI_PATH="/workspace/ComfyUI"
+
     mkdir -p "$COMFYUI_PATH"/user/default/ComfyUI-Manager
     mv /root/comfy.settings.json /root/comfy.templates.json "$COMFYUI_PATH"/user/default
     cp /root/comfy-manager.config.ini "$COMFYUI_PATH"/custom_nodes/ComfyUI-Manager/config.ini
@@ -127,7 +127,7 @@ if [ $FIRST_TIME_INSTALL -eq 1 ]; then
     print-header 'success' 'ComfyUI & Manager installation completed successfully'
 
     print-header 'info' 'Creating zrok, ngrok & SyncThing configurations'
-    NGROK_AUTH_TOKEN="its whatever"
+
     if [ -z "$NGROK_AUTH_TOKEN" ]; then
         cecho red "NGROK_AUTH_TOKEN must be set in order to write ngrok's configuration!"
         exit 1
