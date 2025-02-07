@@ -77,7 +77,9 @@ mkdir -p /root/download-lists &&
     cp /tmp/repofiles/scripts/*.nodes.sh /root/download-lists &&
     cp /tmp/repofiles/scripts/*.models.sh /root/download-lists
 
-cp /tmp/repofiles/scripts/kustom.init_script.sh /root/
+mkdir -p /root/scripts &&
+    cp /tmp/repofiles/scripts/kustom.init_script.sh /root/scripts &&
+    cp /tmp/repofiles/scripts/kustom.manual_script.sh /root/scripts
 
 cp /tmp/repofiles/configs/.screenrc /root/
 cp /tmp/repofiles/configs/*.screenrc /root/
@@ -87,7 +89,7 @@ mkdir -p /root/prog-configs &&
     cp /tmp/repofiles/configs/*.config.ini /root/prog-configs &&
     cp /tmp/repofiles/configs/ngrok-config.yml /root/prog-configs
 
-print-header 'success' 'Repo files moved successfully'
+print-header 'success' 'Repo files copied successfully'
 
 set +e
 
@@ -172,40 +174,14 @@ fi
 print-header 'success' '/workspace initialization completed successfully'
 
 print-header 'info' 'Setting up SSH keys & environment variables'
-# Setup ssh (isn't this done automatically)
+# Setup ssh
 if [[ $PUBLIC_KEY ]]; then
     cecho cyan "Setting up SSH..."
-    mkdir -p ~/.ssh
-    echo "$PUBLIC_KEY" >> /root/.ssh/authorized_keys
+    mkdir -p /root/.ssh
     chmod 700 /root/.ssh
+    echo "$PUBLIC_KEY" >> /root/.ssh/authorized_keys
     chmod 600 /root/.ssh/authorized_keys
-
-    # if [ ! -f /etc/ssh/ssh_host_rsa_key ]; then
-    #     ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -q -N ''
-    #     echo "RSA key fingerprint:"
-    #     ssh-keygen -lf /etc/ssh/ssh_host_rsa_key.pub
-    # fi
-    # if [ ! -f /etc/ssh/ssh_host_dsa_key ]; then
-    #     ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key -q -N ''
-    #     echo "DSA key fingerprint:"
-    #     ssh-keygen -lf /etc/ssh/ssh_host_dsa_key.pub
-    # fi
-    # if [ ! -f /etc/ssh/ssh_host_ecdsa_key ]; then
-    #     ssh-keygen -t ecdsa -f /etc/ssh/ssh_host_ecdsa_key -q -N ''
-    #     echo "ECDSA key fingerprint:"
-    #     ssh-keygen -lf /etc/ssh/ssh_host_ecdsa_key.pub
-    # fi
-    # if [ ! -f /etc/ssh/ssh_host_ed25519_key ]; then
-    #     ssh-keygen -t ed25519 -f /etc/ssh/ssh_host_ed25519_key -q -N ''
-    #     echo "ED25519 key fingerprint:"
-    #     ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
-    # fi
     service ssh start
-    # echo "SSH host keys:"
-    # for key in /etc/ssh/*.pub; do
-    #     echo "Key: $key"
-    #     ssh-keygen -lf "$key"
-    # done
 fi
 
 # Export RunPod specific environment variables (but why tho)

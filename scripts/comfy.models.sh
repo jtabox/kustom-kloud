@@ -1,4 +1,5 @@
-# ComfyUI Models lists file - is imported for installation
+# ComfyUI Models lists file - passed to download-models-from-list.sh
+# shellcheck disable=all
 
 COMFY_MODELS_CKPTS=(
     "https://huggingface.co/Comfy-Org/flux1-dev/resolve/main/flux1-dev-fp8.safetensors"

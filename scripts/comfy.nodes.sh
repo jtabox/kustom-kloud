@@ -1,4 +1,5 @@
-# ComfyUI Nodes list - is imported for installation
+# shellcheck disable=all
+# ComfyUI Nodes list - passed to download-models-from-list.sh
 
 COMFY_NODES=(
     "https://github.com/Acly/comfyui-inpaint-nodes"

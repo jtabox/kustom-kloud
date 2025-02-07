@@ -1,3 +1,5 @@
+# Extra models to download - passed to download-models-from-list.sh
+# shellcheck disable=all
 COMFY_MODELS_OTHER=(
     "https://civitai.com/api/download/models/963489?type=Model&format=GGUF&size=pruned&fp=fp8"
     "https://civitai.com/api/download/models/1249447?type=Model&format=SafeTensor&size=full&fp=fp8"

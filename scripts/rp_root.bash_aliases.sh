@@ -294,7 +294,7 @@ getaimodel() {
 
 get-repo-file() {
     # Download specific files from the repo, e.g.:
-    # https://raw.githubusercontent.com/jtabox/kustom-kloud/main/scripts/extra.models.sh
+    # https://raw.githubusercontent.com/jtabox/kustom-kloud/main/|--> this part: scripts/extra.models.sh
     local reponame
     reponame="jtabox/kustom-kloud"
     local branchname
@@ -302,7 +302,12 @@ get-repo-file() {
     # Check how many args, if 2 then use arg2 as folder and filename for the output, otherwise assume the existing filename in current directory
     local outputfile
     if [ "$#" -ge 2 ]; then
-        outputfile="$2"
+        # Check if the 2nd arg is a directory or a file
+        if [ -d "$2" ]; then
+            outputfile="$2/$(basename "$1")"
+        else
+            outputfile="$2"
+        fi
     else
         outputfile="./"$(basename "$1")
     fi
