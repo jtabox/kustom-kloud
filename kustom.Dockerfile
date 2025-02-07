@@ -128,7 +128,7 @@ WORKDIR /
 
 COPY --chown=root:root scripts /tmp/repofiles/scripts
 COPY --chown=root:root configs /tmp/repofiles/configs
-RUN chmod -R 644 /tmp/repofiles/scripts
+RUN chmod -R 755 /tmp/repofiles/scripts
 
 # HTTP ports:
 EXPOSE 7667 8778 9889 54638
