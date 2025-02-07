@@ -47,8 +47,6 @@ alias wget-all='wget --random-wait -r -p -e robots=off -U mozilla -o $HOME/wget_
 alias wget='wget -c'
 alias zombies='ps aux | awk '\''{if ($8=="Z") { print $2 }}'\'''
 
-
-
 ####################################################################### Env vars
 
 # Terminal colors
@@ -73,14 +71,16 @@ export PTCLR_BG_YELLOW="\e[0;43m"
 
 # System
 export TZ='Europe/Berlin'
+export LANG='C.UTF-8'
+export LC_ALL='C.UTF-8'
 
 # pip and uv settings
-export PIP_NO_CACHE_DIR='1'
-export UV_NO_CACHE='1'
 export PIP_CACHE_DIR='/workspace/.cache/pip'
-export UV_CACHE_DIR='/workspace/.cache/uv'
+export PIP_NO_CACHE_DIR='1'
 export PIP_DISABLE_PIP_VERSION_CHECK='1'
 export PIP_ROOT_USER_ACTION='ignore'
+export UV_CACHE_DIR='/workspace/.cache/uv'
+export UV_NO_CACHE='1'
 
 # Huggingface cache settings
 export HF_HOME='/workspace/.cache/huggingface/'
@@ -98,17 +98,15 @@ export PYTHON_VERSION='3.11'
 export COMFYUI_PATH='/workspace/ComfyUI'
 
 # Also need to re-export the secrets, because runpod names them weirdly
-export NGROK_AUTH_TOKEN="$RUNPOD_SECRET_NAT"
-export ZROK_TOKEN="$RUNPOD_SECRET_ZRT"
-export HF_TOKEN="$RUNPOD_SECRET_HFT"
-export CIVITAI_API_KEY="$RUNPOD_SECRET_CAK"
-export OPENROUTER_API_KEY="$RUNPOD_SECRET_ORK"
-export OPENAI_API_KEY="$RUNPOD_SECRET_OAK"
 export ANTHROPIC_API_KEY="$RUNPOD_SECRET_AAK"
+export CIVITAI_API_KEY="$RUNPOD_SECRET_CAK"
 export FAL_KEY="$RUNPOD_SECRET_FAK"
+export HF_TOKEN="$RUNPOD_SECRET_HFT"
+export NGROK_AUTH_TOKEN="$RUNPOD_SECRET_NAT"
+export OPENAI_API_KEY="$RUNPOD_SECRET_OAK"
+export OPENROUTER_API_KEY="$RUNPOD_SECRET_ORK"
 export REPLICATE_API_TOKEN="$RUNPOD_SECRET_RAT"
-
-
+export ZROK_TOKEN="$RUNPOD_SECRET_ZRT"
 
 ####################################################################### Functions
 
@@ -446,7 +444,7 @@ replace-in-file() {
     if [ -d "$target" ]; then
         cecho yellow "Warning: '$target' is a directory!"
         read -p "Do you want to process all files in this directory? (y/N): " confirm
-        if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+        if [[ ! $confirm =~ ^[Yy]$ ]]; then
             cecho red "Operation cancelled"
             return 0
         fi
@@ -461,12 +459,6 @@ replace-in-file() {
 
     # Handle single file case
     replace-in-file-aux "$target" "$old_str" "$new_str"
-}
-
-subst-in-file() {
-    # Substitutes a string in a file
-    [ "$#" -ne 3 ] && cecho red "\nSubstitutes a string in a file\nUsage: subst-in-file <the file> <find what> <replace with>" && return 1
-    perl -i.orig -pe 's/'"$2"'/'"$3"'/g' "$1"
 }
 
 whereis() {

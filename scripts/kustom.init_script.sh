@@ -34,11 +34,8 @@ if [ $FIRST_TIME_INSTALL -eq 1 ]; then
     cecho cyan 'Moving and symlinking directories to /workspace'
     mkdir -p /workspace/containerdirs &&
         chmod 755 /workspace/containerdirs
-    # /root -> /workspace/containerdirs/root
     mv /root /workspace/containerdirs/root
-    # python3.11 -> /workspace/containerdirs/usrlocallib_py311
     mv /usr/local/lib/python3.11 /workspace/containerdirs/usrlocallib_py311
-    # usr/local/bin -> /workspace/containerdirs/usrlocalbin
     mv /usr/local/bin /workspace/containerdirs/usrlocalbin
 else
     cecho cyan 'Deleting and restoring existing symlinks from /workspace'
@@ -61,13 +58,14 @@ for linked_dir in "/root" "/usr/local/lib/python3.11" "/usr/local/bin"; do
         exit 1
     fi
 done
+
 print-header 'success' 'Symlinking completed successfully'
 
 print-header 'info' 'Moving repo files to designated locations'
 # Move all the repo files from /tmp them to their designated locations, overwriting existing ones
 cd /root
 
-cp  /tmp/repofiles/scripts/rp_root.bash_aliases.sh /root/.bash_aliases &&
+cp /tmp/repofiles/scripts/rp_root.bash_aliases.sh /root/.bash_aliases &&
     source /root/.bash_aliases
 
 cp /tmp/repofiles/configs/nano-conf.tgz /root/ &&
@@ -106,7 +104,6 @@ if [ $FIRST_TIME_INSTALL -eq 1 ]; then
         git clone https://github.com/ltdrdata/ComfyUI-Manager.git &&
         cecho green "ComfyUI and Manager cloned successfully"
 
-
     # Install main python packages and comfy
     cecho yellow 'Installing Python dependencies'
     python -m pip install --upgrade pip
@@ -131,7 +128,7 @@ if [ $FIRST_TIME_INSTALL -eq 1 ]; then
 
     # zrok
     if [ -z "$ZROK_TOKEN" ]; then
-        cecho red "ZROK_TOKEN doesn't seem to be set. Can't initialize zrok - must be done manually."
+        cecho red "ZROK_TOKEN doesn't seem to be set. Will not be initializing zrok, must be done manually."
     else
         zrok enable "$ZROK_TOKEN" -v -d rp.io
     fi
@@ -166,53 +163,55 @@ if [ $FIRST_TIME_INSTALL -eq 1 ]; then
     # fi
 
     if ! touch /workspace/_INSTALL_COMPLETE; then
-        cecho red "IMPORTANT! Could not create _INSTALL_COMPLETE file! MUST BE DONE MANUALLY, otherwise the setup will run again on next container start!"
-        cecho red "IMPORTANT! Could not create _INSTALL_COMPLETE file! MUST BE DONE MANUALLY, otherwise the setup will run again on next container start!"
+        cecho red "IMPORTANT!"
+        cecho red "Could not create _INSTALL_COMPLETE file! DO IT MANUALLY, otherwise the setup will run again on next container start!"
+        cecho red "IMPORTANT!"
     fi
 fi
 
 print-header 'success' '/workspace initialization completed successfully'
 
-
 print-header 'info' 'Setting up SSH keys & environment variables'
-# Setup ssh
+# Setup ssh (isn't this done automatically)
 if [[ $PUBLIC_KEY ]]; then
     cecho cyan "Setting up SSH..."
     mkdir -p ~/.ssh
-    echo "$PUBLIC_KEY" >> ~/.ssh/authorized_keys
-    chmod 700 -R ~/.ssh
-     if [ ! -f /etc/ssh/ssh_host_rsa_key ]; then
-        ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -q -N ''
-        echo "RSA key fingerprint:"
-        ssh-keygen -lf /etc/ssh/ssh_host_rsa_key.pub
-    fi
-    if [ ! -f /etc/ssh/ssh_host_dsa_key ]; then
-        ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key -q -N ''
-        echo "DSA key fingerprint:"
-        ssh-keygen -lf /etc/ssh/ssh_host_dsa_key.pub
-    fi
-    if [ ! -f /etc/ssh/ssh_host_ecdsa_key ]; then
-        ssh-keygen -t ecdsa -f /etc/ssh/ssh_host_ecdsa_key -q -N ''
-        echo "ECDSA key fingerprint:"
-        ssh-keygen -lf /etc/ssh/ssh_host_ecdsa_key.pub
-    fi
-    if [ ! -f /etc/ssh/ssh_host_ed25519_key ]; then
-        ssh-keygen -t ed25519 -f /etc/ssh/ssh_host_ed25519_key -q -N ''
-        echo "ED25519 key fingerprint:"
-        ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
-    fi
+    echo "$PUBLIC_KEY" >> /root/.ssh/authorized_keys
+    chmod 700 /root/.ssh
+    chmod 600 /root/.ssh/authorized_keys
+
+    # if [ ! -f /etc/ssh/ssh_host_rsa_key ]; then
+    #     ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -q -N ''
+    #     echo "RSA key fingerprint:"
+    #     ssh-keygen -lf /etc/ssh/ssh_host_rsa_key.pub
+    # fi
+    # if [ ! -f /etc/ssh/ssh_host_dsa_key ]; then
+    #     ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key -q -N ''
+    #     echo "DSA key fingerprint:"
+    #     ssh-keygen -lf /etc/ssh/ssh_host_dsa_key.pub
+    # fi
+    # if [ ! -f /etc/ssh/ssh_host_ecdsa_key ]; then
+    #     ssh-keygen -t ecdsa -f /etc/ssh/ssh_host_ecdsa_key -q -N ''
+    #     echo "ECDSA key fingerprint:"
+    #     ssh-keygen -lf /etc/ssh/ssh_host_ecdsa_key.pub
+    # fi
+    # if [ ! -f /etc/ssh/ssh_host_ed25519_key ]; then
+    #     ssh-keygen -t ed25519 -f /etc/ssh/ssh_host_ed25519_key -q -N ''
+    #     echo "ED25519 key fingerprint:"
+    #     ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
+    # fi
     service ssh start
-    echo "SSH host keys:"
-    for key in /etc/ssh/*.pub; do
-        echo "Key: $key"
-        ssh-keygen -lf "$key"
-    done
+    # echo "SSH host keys:"
+    # for key in /etc/ssh/*.pub; do
+    #     echo "Key: $key"
+    #     ssh-keygen -lf "$key"
+    # done
 fi
 
-# Export runpod env vars (not really sure why)
+# Export RunPod specific environment variables (but why tho)
 cecho cyan "Exporting environment variables..."
-printenv | grep -E '^RUNPOD_|^PATH=|^_=' | awk -F = '{ print "export " $1 "=\"" $2 "\"" }' >> /root/rp.io_envs.sh
-echo 'source /root/rp.io_envs.sh' >> ~/.bashrc
+printenv | grep '^RUNPOD_' | sort | awk -F = '{ print "export " $1 "=\"" $2 "\"" }' >> /root/rp.io_envs.sh
+echo -e '\n\nsource /root/rp.io_envs.sh' >> /root/.bashrc
 
-
+# Dream of electric sheep
 sleep infinity

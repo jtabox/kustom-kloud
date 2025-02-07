@@ -49,6 +49,8 @@ RUN apt-get update && \
         mc \
         nano \
         ncdu \
+        openssh-server \
+        openssh-client \
         ranger \
         rsync \
         screen \
@@ -110,8 +112,6 @@ RUN if [ -n "${PYTHON_VERSION}" ]; then \
     apt-get autoremove -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
-    echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
-
 # Additional tools
 RUN wget https://github.com/sharkdp/bat/releases/download/v"${BATVERSION}"/bat_"${BATVERSION}"_amd64.deb && \
     dpkg -i bat_"${BATVERSION}"_amd64.deb && \
@@ -122,20 +122,18 @@ RUN wget https://github.com/sharkdp/bat/releases/download/v"${BATVERSION}"/bat_"
     curl -LsSf https://astral.sh/uv/install.sh | env UV_UNMANAGED_INSTALL="/root/.local/bin" sh && \
     rm -rf /tmp/* /var/tmp/*
 
-# Make scripts and configs available to be used
+# Copy scripts and configs in /tmp/repofiles, the init script will get them from there when it runs
 WORKDIR /
 
 COPY --chown=root:root scripts /tmp/repofiles/scripts
 COPY --chown=root:root configs /tmp/repofiles/configs
-COPY --chown=root:root scripts/kustom.init_script.sh /starter.sh
 RUN chmod +x /tmp/repofiles/scripts/*
-RUN chmod +x /starter.sh
 
-# Do I expose the ports here?
 # HTTP ports:
 EXPOSE 7667 8778 9889 54638
 # TCP ports:
 EXPOSE 22 6556 5445 41648
 
 # Start the container
-ENTRYPOINT ["/bin/bash", "-c", "exec /starter.sh"]
+# ENTRYPOINT ["/bin/bash", "-c", "exec /starter.sh"]
+CMD [ "/tmp/repofiles/scripts/kustom.init_script.sh" ]
