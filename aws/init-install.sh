@@ -118,10 +118,10 @@ print-header 'success' 'APT packages installed successfully'
 
 print-header 'info' 'Downloading repo files'
 
-get-repo-file 'aws/bash-aliases.sh' /home/ubuntu/.bash_aliases
+get-repo-file 'aws/bash-aliases.sh' /home/$USER/.bash_aliases
 
-get-repo-file 'configs/nano-conf.tgz' /home/ubuntu &&
-    tar -xzf nano-conf.tgz -C /home/ubuntu/ &&
+get-repo-file 'configs/nano-conf.tgz' /home/$USER &&
+    tar -xzf nano-conf.tgz -C /home/$USER/ &&
     rm nano-conf.tgz
 
 print-header 'success' 'Repo files downloaded successfully'
@@ -131,10 +131,10 @@ print-header 'info' 'Doing some minor final steps'
 set +e
 
 # stfu motd
-echo stfu motd > /home/ubuntu/.hushlogin
+echo stfu motd > /home/$USER/.hushlogin
 
 # Set ownership of everything in home dir to ubuntu
-sudo chown -R ubuntu:ubuntu /home/ubuntu
+sudo chown -R $USER:$USER /home/$USER
 
 # Should probably unset PYTHONUNBUFFERED and DEBIAN_FRONTEND
 unset PYTHONUNBUFFERED
