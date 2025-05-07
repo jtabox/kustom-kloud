@@ -170,11 +170,11 @@ cecho() {
         if [[ $1 == "--help" ]]; then
             echo -e "\n${CLR_UFG_CYAN}Makes printing colored messages easier${CLR_CLEAR}\n"
             echo -e "${CLR_UFG_YELLOW}Usage:${CLR_CLEAR} ${CLR_FG_BLUE}cecho${CLR_CLEAR} ${CLR_FG_CYAN}[color]${CLR_CLEAR} ${CLR_FG_LIGHTBLUE}<message>${CLR_CLEAR}\n"
-            echo -e "${CLR_FG_YELLOW}  [color] can be one of the following colors (+b for background color, l+ for light tint:). No [color] functions as a simple 'echo -e'${CLR_CLEAR}"
             echo -e "${CLR_UFG_ORANGE}Available colors:${CLR_CLEAR}"
-            echo -e "  ${CLR_UFG_YELLOW}[color]:${CLR_CLEAR} ${CLR_FG_BLUE}blue${CLR_CLEAR}, ${CLR_FG_GRAY}gray/grey${CLR_CLEAR}, ${CLR_FG_GREEN}green${CLR_CLEAR}, ${CLR_FG_MAGENTA}magenta${CLR_CLEAR}, ${CLR_FG_RED}red${CLR_CLEAR}, ${CLR_FG_YELLOW}yellow${CLR_CLEAR}"
-            echo -e "  ${CLR_UFG_YELLOW}    +b :${CLR_CLEAR} ${CLR_BG_CYAN}cyan${CLR_CLEAR}, ${CLR_BG_GRAY}gray/grey${CLR_CLEAR}, ${CLR_BG_GREEN}green${CLR_CLEAR}, ${CLR_BG_MAGENTA}magenta${CLR_CLEAR}, ${CLR_BG_RED}red${CLR_CLEAR}, ${CLR_BG_YELLOW}yellow${CLR_CLEAR}"
-            echo -e "  ${CLR_UFG_YELLOW}    l+ :${CLR_CLEAR} ${CLR_FG_LIGHTBLUE}lblue${CLR_CLEAR}, ${CLR_FG_LIGHTGREEN}lgreen${CLR_CLEAR}, ${CLR_FG_ORANGE}orange${CLR_CLEAR}"
+            echo -e "${CLR_FG_ORANGE}[color] can be one of the following colors, +b for background color, l+ for light tint. No [color] functions as a simple 'echo -e' :${CLR_CLEAR}"
+            echo -e "${CLR_UFG_YELLOW}[color]:${CLR_CLEAR} ${CLR_FG_BLUE}blue${CLR_CLEAR}, ${CLR_FG_GRAY}gray/grey${CLR_CLEAR}, ${CLR_FG_GREEN}green${CLR_CLEAR}, ${CLR_FG_MAGENTA}magenta${CLR_CLEAR}, ${CLR_FG_RED}red${CLR_CLEAR}, ${CLR_FG_YELLOW}yellow${CLR_CLEAR}"
+            echo -e "${CLR_UFG_YELLOW}    +b :${CLR_CLEAR} ${CLR_BG_CYAN}cyan${CLR_CLEAR}, ${CLR_BG_GRAY}gray/grey${CLR_CLEAR}, ${CLR_BG_GREEN}green${CLR_CLEAR}, ${CLR_BG_MAGENTA}magenta${CLR_CLEAR}, ${CLR_BG_RED}red${CLR_CLEAR}, ${CLR_BG_YELLOW}yellow${CLR_CLEAR}"
+            echo -e "${CLR_UFG_YELLOW}    l+ :${CLR_CLEAR} ${CLR_FG_LIGHTBLUE}lblue${CLR_CLEAR}, ${CLR_FG_LIGHTGREEN}lgreen${CLR_CLEAR}, ${CLR_FG_ORANGE}orange${CLR_CLEAR}"
             return
         fi
         local message=${@:1}
