@@ -167,39 +167,41 @@ export LC_ALL='C.UTF-8'
 cecho() {
     # Makes printing colored messages easier. 1st arg: see below, rest is the message
     if [ "$#" -eq 1 ]; then
+        if [[ $1 == "--help" ]]; then
+            echo -e "\n${CLR_FG_CYAN}Makes printing colored messages easier${CLR_CLEAR}\n"
+            echo -e "${CLR_FG_YELLOW}Usage:${CLR_CLEAR} ${CLR_FG_BLUE}cecho [color]${CLR_CLEAR} ${CLR_FG_BLUE}<message>${CLR_CLEAR}\n"
+            echo -e "${CLR_FG_GREEN}Available colors:${CLR_CLEAR}"
+            echo -e "  ${CLR_FG_BLUE}blue${CLR_CLEAR}, ${CLR_BG_BLUE}blueb${CLR_CLEAR}, ${CLR_FG_CYAN}cyan${CLR_CLEAR}, ${CLR_BG_CYAN}cyanb${CLR_CLEAR}..."
+            echo -e "\nMakes printing colored messages easier\n" \
+                "Usage: cecho [color] <message>\n" \
+                "Available colors (+b for background color instead): blue[b], cyan[b], gray[b], green[b], magenta[b], red[b], yellow[b]\n" \
+                "Extra colors (with no background alternative): lblue, lgreen, orange\n" \
+                "No color argument functions as a simple 'echo -e'"
+            return
+        fi
         local message=${@:1}
         echo -e "${CLR_CLEAR}${message}${CLR_CLEAR}"
         return
     fi
+
     local message=${@:2}
-    local color=${1}
-    local colorvar=$CLR_CLEAR
+    if [[ -n $ZSH_VERSION ]]; then
+        local color=${1:l}
+    else
+        local color=${1,,}
+    fi  # Convert to lowercase for case-insensitive matching
+
+    # Use a more efficient case statement with pattern matching
     case $color in
-    blue) colorvar=$CLR_FG_BLUE ;;
-    blueb) colorvar=$CLR_BG_BLUE ;;
-    cyan) colorvar=$CLR_FG_CYAN ;;
-    cyanb) colorvar=$CLR_BG_CYAN ;;
-    gray) colorvar=$CLR_FG_GRAY ;;
-    grayb) colorvar=$CLR_BG_GRAY ;;
-    green) colorvar=$CLR_FG_GREEN ;;
-    greenb) colorvar=$CLR_BG_GREEN ;;
-    grey) colorvar=$CLR_FG_GRAY ;;
-    greyb) colorvar=$CLR_BG_GRAY ;;
-    lblue) colorvar=$CLR_FG_LIGHTBLUE ;;
-    lgreen) colorvar=$CLR_FG_LIGHTGREEN ;;
-    magenta) colorvar=$CLR_FG_MAGENTA ;;
-    magentab) colorvar=$CLR_BG_MAGENTA ;;
-    orange) colorvar=$CLR_FG_ORANGE ;;
-    red) colorvar=$CLR_FG_RED ;;
-    redb) colorvar=$CLR_BG_RED ;;
-    yellow) colorvar=$CLR_FG_YELLOW ;;
-    yellowb) colorvar=$CLR_BG_YELLOW ;;
-    --help) echo -e "\nMakes printing colored messages easier\n" \
-        "Usage: cecho [color] <message>\n" \
-        "Available colors (+b for background color instead): blue[b], cyan[b], gray[b], green[b], magenta[b], red[b], yellow[b]\n" \
-        "Extra colors (with no background alternative): lblue, lgreen, orange\n" \
-        "No color argument functions as a simple 'echo -e'" ;;
-    *) colorvar=$CLR_CLEAR ;;
+        *blue*) if [[ $color == *b ]]; then colorvar=$CLR_BG_BLUE; elif [[ $color == l* ]]; then colorvar=$CLR_FG_LIGHTBLUE; else colorvar=$CLR_FG_BLUE; fi ;;
+        *green*) if [[ $color == *b ]]; then colorvar=$CLR_BG_GREEN; elif [[ $color == l* ]]; then colorvar=$CLR_FG_LIGHTGREEN; else colorvar=$CLR_FG_GREEN; fi ;;
+        cyan*) if [[ $color == *b ]]; then colorvar=$CLR_BG_CYAN; else colorvar=$CLR_FG_CYAN; fi ;;
+        gr*y*) if [[ $color == *b ]]; then colorvar=$CLR_BG_GRAY; else colorvar=$CLR_FG_GRAY; fi ;;
+        red*) if [[ $color == *b ]]; then colorvar=$CLR_BG_RED; else colorvar=$CLR_FG_RED; fi ;;
+        yellow*) if [[ $color == *b ]]; then colorvar=$CLR_BG_YELLOW; else colorvar=$CLR_FG_YELLOW; fi ;;
+        magenta*) if [[ $color == *b ]]; then colorvar=$CLR_BG_MAGENTA; else colorvar=$CLR_FG_MAGENTA; fi ;;
+        orange) colorvar=$CLR_FG_ORANGE ;;
+        *) colorvar=$CLR_CLEAR ;;
     esac
     echo -e "${colorvar}${message}${CLR_CLEAR}"
     return
@@ -209,16 +211,26 @@ check-port() {
     # Check if a port is bound or list all of the bound ports if no arg
     if [ -z "$1" ]; then
         cecho cyan "\nNo port specified, listing all bound ports:"
-        cecho yellow "\n*** netstat:"
-        sudo netstat -tulpn
+
+        # Use a more modern approach with ss instead of netstat
+        cecho yellow "\n*** ss:"
+        sudo ss -tulpn
+
         cecho yellow "\n*** lsof:"
-        sudo lsof -Pan -i tcp -i udp
+        sudo lsof -Pan -i tcp -i udp | sort -nk9  # Sort by port number
+
+        cecho yellow "\n*** netstat:"
+        sudo netstat -tulnp | sort -nk9  # Sort by port number
     else
         cecho cyan "\nChecking port $1:"
-        cecho yellow "\n*** netstat:"
-        sudo netstat -tulpn | grep ":$1"
+        cecho yellow "\n*** ss:"
+        sudo ss -tulpn | grep -E ":$1\\s"  # More precise grep pattern
+
         cecho yellow "\n*** lsof:"
-        sudo lsof -Pan -i tcp -i udp | grep ":$1"
+        sudo lsof -Pan -i tcp -i udp | grep -E ":$1\\s"
+
+        cecho yellow "\n*** netstat:"
+        sudo netstat -tulnp | grep -E ":$1\\s"  # More precise grep pattern
     fi
     cecho green '\nDone.'
 }
@@ -226,7 +238,8 @@ check-port() {
 aria-get() {
     # Uses aria2c to download a file from a URL
     if [ $# -eq 0 ]; then
-        cecho red "\nUses aria2c to download a file from a URL\nUsage: fetch_url <url> [target_dir (current dir if not specified)]"
+        cecho red "\nUses aria2c to download a file from a URL\n"
+        cecho yellow "Usage: aria-get <url> [target_dir (current dir if not specified)]"
         return
     elif [ $# -eq 1 ]; then
         target_dir="$(pwd)"
