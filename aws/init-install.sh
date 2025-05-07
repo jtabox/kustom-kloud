@@ -101,6 +101,8 @@ sudo apt-get autoremove -y
 sudo apt-get clean
 sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+sudo usermod -aG docker $USER
+
 # More tools!
 BATVERSION="0.25.0"
 RIPGREPVERSION="14.1.1"
