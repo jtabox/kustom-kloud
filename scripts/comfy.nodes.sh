@@ -86,3 +86,8 @@ COMFY_NODES=(
     "https://github.com/yhayano-ponotech/ComfyUI-Fal-API-Flux"
     "https://github.com/yolain/ComfyUI-Easy-Use"
 )
+
+# will need to install
+# pip install --no-deps https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.4-cu124/llama_cpp_python-0.3.4-cp311-cp311-linux_x86_64.whl
+# pip install --no-deps https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.4-cu121/llama_cpp_python-0.3.4-cp311-cp311-linux_x86_64.whl
+# for searge llm to work
