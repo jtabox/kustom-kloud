@@ -26,6 +26,7 @@ sudo apt-get upgrade -y
 sudo apt-get install -y --no-install-recommends \
     apt-utils \
     aria2 \
+    bat \
     btop \
     build-essential \
     ca-certificates \
@@ -46,6 +47,7 @@ sudo apt-get install -y --no-install-recommends \
     openssh-server \
     openssh-client \
     ranger \
+    ripgrep \
     rsync \
     screen \
     software-properties-common \
@@ -55,26 +57,25 @@ sudo apt-get install -y --no-install-recommends \
     zip \
     zstd
 
-
 sudo mkdir -p /etc/apt/keyrings
 
-wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg && \
-echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | sudo tee /etc/apt/sources.list.d/gierens.list && \
-sudo chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list
+wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg &&
+    echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | sudo tee /etc/apt/sources.list.d/gierens.list &&
+    sudo chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list
 
-curl -sSL https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null && \
-echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list
+curl -sSL https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null &&
+    echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list
 
-sudo curl -Lo /etc/apt/keyrings/syncthing-archive-keyring.gpg https://syncthing.net/release-key.gpg && \
-echo "deb [signed-by=/etc/apt/keyrings/syncthing-archive-keyring.gpg] https://apt.syncthing.net/ syncthing stable" | sudo tee /etc/apt/sources.list.d/syncthing.list
+sudo curl -Lo /etc/apt/keyrings/syncthing-archive-keyring.gpg https://syncthing.net/release-key.gpg &&
+    echo "deb [signed-by=/etc/apt/keyrings/syncthing-archive-keyring.gpg] https://apt.syncthing.net/ syncthing stable" | sudo tee /etc/apt/sources.list.d/syncthing.list
 
-curl -sSLf https://get.openziti.io/tun/package-repos.gpg | sudo gpg --dearmor --output /usr/share/keyrings/openziti.gpg && \
-sudo chmod a+r /usr/share/keyrings/openziti.gpg && \
-echo "deb [signed-by=/usr/share/keyrings/openziti.gpg] https://packages.openziti.org/zitipax-openziti-deb-stable debian main" | sudo tee /etc/apt/sources.list.d/openziti-release.list >/dev/null
+curl -sSLf https://get.openziti.io/tun/package-repos.gpg | sudo gpg --dearmor --output /usr/share/keyrings/openziti.gpg &&
+    sudo chmod a+r /usr/share/keyrings/openziti.gpg &&
+    echo "deb [signed-by=/usr/share/keyrings/openziti.gpg] https://packages.openziti.org/zitipax-openziti-deb-stable debian main" | sudo tee /etc/apt/sources.list.d/openziti-release.list >/dev/null
 
 # Docker install
 for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do
-    sudo apt-get remove $pkg;
+    sudo apt-get remove $pkg
 done
 
 # Add Docker's official GPG key:
@@ -83,7 +84,7 @@ sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyring
 sudo chmod a+r /etc/apt/keyrings/docker.asc
 # Add the repository to Apt sources:
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-	$(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+	$(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
 
 sudo apt-get update
 sudo apt-get install -y --no-install-recommends \
@@ -103,17 +104,6 @@ sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 sudo usermod -aG docker $USER
 
-# More tools!
-BATVERSION="0.25.0"
-RIPGREPVERSION="14.1.1"
-wget https://github.com/sharkdp/bat/releases/download/v"${BATVERSION}"/bat_"${BATVERSION}"_amd64.deb && \
-    sudo dpkg -i bat_"${BATVERSION}"_amd64.deb && \
-    rm bat_"${BATVERSION}"_amd64.deb
-
-curl -LO https://github.com/BurntSushi/ripgrep/releases/download/"${RIPGREPVERSION}"/ripgrep_"${RIPGREPVERSION}"-1_amd64.deb && \
-    sudo dpkg -i ripgrep_"${RIPGREPVERSION}"-1_amd64.deb && \
-    rm ripgrep_"${RIPGREPVERSION}"-1_amd64.deb
-
 sudo rm -rf /tmp/* /var/tmp/*
 
 print-header 'success' 'APT packages installed successfully'
@@ -124,7 +114,8 @@ get-repo-file 'aws/bash-aliases.sh' /home/$USER/.bash_aliases
 
 get-repo-file 'configs/nano-conf.tgz' /home/$USER &&
     tar -xzf nano-conf.tgz -C /home/$USER/ &&
-    rm nano-conf.tgz
+    rm nano-conf.tgz &&
+    sudo cp /home/$USER/.nanorc /etc/nanorc
 
 print-header 'success' 'Repo files downloaded successfully'
 
@@ -133,15 +124,14 @@ print-header 'info' 'Doing some minor final steps'
 set +e
 
 # stfu motd
-echo stfu motd > /home/$USER/.hushlogin
+echo stfu motd >/home/$USER/.hushlogin
 
 # Set ownership of everything in home dir to ubuntu
 sudo chown -R $USER:$USER /home/$USER
 
 # Should probably unset PYTHONUNBUFFERED and DEBIAN_FRONTEND
 unset PYTHONUNBUFFERED
-# unset DEBIAN_FRONTEND
+unset DEBIAN_FRONTEND
 
 print-header 'success' 'init script completed successfully'
 print-header 'warn' "Don't forget to 'source ~/.bash_aliases' (or relog)"
-
