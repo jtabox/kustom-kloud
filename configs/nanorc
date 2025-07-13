@@ -1,0 +1,148 @@
+## kustom nanorc + info
+
+## ========== Settings ==========
+set atblanks
+set autoindent
+set constantshow
+set guidestripe 81
+set historylog
+set indicator
+set linenumbers
+set locking
+set minibar
+set smarthome
+set softwrap
+set stateflags
+set tabsize 4
+set tabstospaces
+set trimblanks
+set unix
+set zap
+
+## ========== Colors ==========
+set errorcolor bold,,red
+set functioncolor italic,blue
+set keycolor italic,blue
+set numbercolor blue
+set promptcolor lightwhite,grey
+set scrollercolor lightblack
+set selectedcolor lightwhite,blue
+set spotlightcolor black,lightyellow
+set statuscolor green,black
+set stripecolor lightblack,black
+set titlecolor bold,green
+
+## ========== Syntax highlighting ==========
+include "/usr/share/nano/*.nanorc"
+extendsyntax python tabgives "    "
+extendsyntax Makefile tabgives "	"
+extendsyntax ZSH tabgives "  "
+
+## ========== Bindings ==========
+bind ^H chopwordleft main
+
+unbind ^] main
+unbind ^B main
+unbind ^J main
+unbind ^N main
+unbind ^P main
+unbind ^R main
+unbind ^V main
+unbind ^X main
+unbind M-/ main
+unbind M-3 main
+unbind M-6 main
+unbind M-: main
+unbind M-; main
+unbind M-\ main
+unbind M-] main
+unbind M-A main
+unbind M-B main
+unbind M-C main
+unbind M-D main
+unbind M-E main
+unbind M-F main
+unbind M-G main
+unbind M-J main
+unbind M-K main
+unbind M-K main
+unbind M-N main
+unbind M-R main
+unbind M-W main
+unbind M-X main
+unbind M-Y main
+unbind M-Z main
+
+## Save
+unbind ^S main
+bind ^S savefile main
+## Save as
+unbind ^W main
+bind ^W writeout main
+## Insert file into current
+unbind ^O main
+bind ^O insert main
+## Exit
+unbind ^Q all
+bind ^Q exit all
+## Cut line
+unbind ^K main
+bind ^K cut main
+## Copy line
+unbind ^C main
+bind ^C copy main
+## Paste line
+unbind ^U main
+bind ^U paste main
+## Complete word
+unbind ^Space main
+bind ^Space complete main
+## Comment/uncomment
+unbind M-Q main
+bind M-Q comment main
+## Undo
+unbind ^Z main
+bind ^Z undo main
+## Redo
+unbind ^Y main
+bind ^Y redo main
+## Forward search
+unbind ^F main
+bind ^F whereis main
+## Next occurrence backward
+unbind ^D main
+bind ^D findprevious main
+## Next occurrence forward
+unbind ^G main
+bind ^G findnext main
+## Execute command
+unbind ^E main
+bind ^E execute main
+## Go to line
+unbind ^T main
+unbind ^T browser
+bind ^T gotoline main
+bind ^T gotodir browser
+## Go to complementary bracket
+unbind M-9 main
+bind M-9 findbracket main
+## Turn mark on/off
+unbind ^A main
+bind ^A mark main
+## Enter next keystroke verbatim
+unbind M-U main
+bind M-U verbatim main
+## Suspend into background
+unbind M-2 all
+bind M-2 suspend all
+
+## ========== Toggles ==========
+## Hard Wrapping
+unbind M-H main
+bind M-H breaklonglines main
+## Mouse Support
+unbind M-1 all
+bind M-1 mouse all
+## Tabs To Spaces
+unbind M-T main
+bind M-T tabstospaces main

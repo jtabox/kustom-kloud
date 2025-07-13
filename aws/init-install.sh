@@ -11,11 +11,11 @@ set -eo pipefail
 source <(curl -sSf https://raw.githubusercontent.com/jtabox/kustom-kloud/main/aws/bash-aliases.sh)
 
 # Set environment variables
-# export PYTHONUNBUFFERED="True"
+export PYTHONUNBUFFERED="True"
 # export PIP_NO_CACHE_DIR='1'
 # export PIP_ROOT_USER_ACTION='ignore'
 # export PIP_DISABLE_PIP_VERSION_CHECK='1'
-# export DEBIAN_FRONTEND="noninteractive"
+export DEBIAN_FRONTEND="noninteractive"
 export LANG="C.UTF-8"
 export LC_ALL="C.UTF-8"
 
@@ -112,10 +112,13 @@ print-header 'info' 'Downloading repo files'
 
 get-repo-file 'aws/bash-aliases.sh' /home/$USER/.bash_aliases
 
-get-repo-file 'configs/nano-conf.tgz' /home/$USER &&
-    tar -xzf nano-conf.tgz -C /home/$USER/ &&
-    rm nano-conf.tgz &&
-    sudo cp /home/$USER/.nanorc /etc/nanorc
+get-repo-file 'configs/nanorc' /home/$USER/nanorc &&
+    sudo mv /home/$USER/nanorc /etc/nanorc
+
+get-repo-file 'configs/nanorcs.tgz' /home/$USER &&
+    sudo rm -rf /usr/share/nano/* &&
+    sudo tar -xzf /home/$USER/nanorcs.tgz -C /usr/share/nano/ &&
+    rm /home/$USER/nanorcs.tgz
 
 print-header 'success' 'Repo files downloaded successfully'
 
