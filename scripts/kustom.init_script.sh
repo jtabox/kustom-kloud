@@ -89,9 +89,13 @@ mkdir -p /root/prog-configs &&
     cp /tmp/repofiles/configs/*.config.ini /root/prog-configs &&
     cp /tmp/repofiles/configs/ngrok-config.yml /root/prog-configs
 
+
 print-header 'success' 'Repo files copied successfully'
 
 set +e
+
+# Those will be used later on (for syncthing and for screen logs)
+mkdir -p /root/root-sync /root/logs
 
 if [ $FIRST_TIME_INSTALL -eq 1 ]; then
     # stfu motd
@@ -187,7 +191,13 @@ fi
 # Export RunPod specific environment variables (but why tho)
 cecho cyan "Exporting environment variables..."
 printenv | grep '^RUNPOD_' | sort | awk -F = '{ print "export " $1 "=\"" $2 "\"" }' >> /root/rp.io_envs.sh
-echo -e '\n\nsource /root/rp.io_envs.sh' >> /root/.bashrc
+
+# Check if the source line already exists in .bashrc
+if ! grep -Fq "source /root/rp.io_envs.sh" /root/.bashrc; then
+    echo -e '\n\nsource /root/rp.io_envs.sh' >> /root/.bashrc
+fi
+
+print-header 'success' "The container is now fully initialized and you may enter. I'm gonna go to sleep."
 
 # Dream of electric sheep
 sleep infinity
