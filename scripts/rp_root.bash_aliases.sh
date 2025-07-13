@@ -91,7 +91,7 @@ export HUGGINGFACE_HUB_CACHE='/workspace/.cache/huggingface/hub/'
 export HUGGINGFACE_ASSETS_CACHE='/workspace/.cache/huggingface/assets/'
 
 # Faster transfer of models from HF hub to the container
-export HF_HUB_ENABLE_HF_TRANSFER='1'
+# export HF_HUB_ENABLE_HF_TRANSFER='1'
 
 # Various software settings
 export PYTHON_VERSION='3.11'
@@ -342,7 +342,7 @@ path-remove() {
 
 print-header() {
     # Overly complicated header printer
-    # Usage: print_header <'type'> (always) <'main_text'> or <'text_line1'> <'text_line2'> ['text_line3']
+    # Usage: print-header <'type'> (always) <'main_text'> or <'text_line1'> <'text_line2'> ['text_line3']
     local type="$1"
     shift
     local color_code
@@ -482,7 +482,7 @@ whereis() {
 
 install-nodes-from-list() {
     # Installs multiple nodes from a file containing an array with node repo urls
-    print_header 'info' 'ComfyUI Nodes Batch Install'
+    print-header 'info' 'ComfyUI Nodes Batch Install'
 
     if [ -z "$1" ]; then
         cecho red "\n:: Usage: install_multiple_nodes <file_with_nodes>"
@@ -521,12 +521,12 @@ install-nodes-from-list() {
         cecho orange "\n:: Running command for group $((i + 1)) of $NUM_GROUPS ..."
         $nodes_command
     done
-    print_header 'success' 'Finished processing all the nodes in the file'
+    print-header 'success' 'Finished processing all the nodes in the file'
 }
 
 download-models-from-list() {
     # Downloads multiple models from a file containing an array with model urls
-    print_header 'ComfyUI Models Batch Download'
+    print-header 'ComfyUI Models Batch Download'
 
     if [ -z "$1" ]; then
         cecho red "\n:: Usage: download_multiple_models <file_with_models>"
@@ -587,7 +587,7 @@ download-models-from-list() {
         getaimodel "$file_url" inc
         ((other_counter++))
     done
-    print_header 'success' 'Finished processing all the models in the file'
+    print-header 'success' 'Finished processing all the models in the file'
 }
 
 run-comfy() {
