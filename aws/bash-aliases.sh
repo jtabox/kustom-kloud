@@ -2,9 +2,16 @@
 # shellcheck disable=all
 
 ### Enormous (and it's an understatement) .bash_aliases file for cloud instances
+# Assumes it's run by non-root user, so it uses 'sudo'
+# Note: It's highly customized and personalized. I uploaded it and made it public
+# so I can easily access it from the cloud. If you're not me, you probably want
+# to go through it and adjust stuff.
 # https://raw.githubusercontent.com/jtabox/kustom-kloud/main/aws/bash-aliases.sh
 
-## lol prompt
+
+######################################################################## Prompt
+
+# If good, green. If bad, red. Why use many word when few word do trick?
 PS1='\[\e[92;1m\]\A \[\e[94m\]\u $(if [[ $? -eq 0 ]]; then echo -e "\[\e[30;102;1m\]0"; else echo -e "\[\e[97;101;1m\]$?"; fi)\[\e[0m\] \[\e[38;5;202m\]\w \[\e[0m\]'
 
 ######################################################################## Aliases
@@ -20,11 +27,16 @@ alias cat='bat --theme="Visual Studio Dark+" --style=numbers'
 alias ck='bat --theme="Visual Studio Dark+" --style=numbers'
 alias cp='cp --verbose'
 alias dir-diff='diff -urp'
+alias dsprune='sudo docker system prune -a -f --volumes && sudo docker volume prune -a -f'
+alias dcud='docker compose pull && docker compose up -d'
+alias dcdn='docker compose down'
 alias epoch='date +%s'
 alias grep='GREP_COLORS="mt=1;37;41" LANG=C grep --color=auto'
 alias grepproc='sudo ps -aux | grep'
 alias howbig='sudo du -hd 1'
 alias htop='btop'
+alias iptabs='sudo iptables -L -v -n'
+alias iptabs-in='sudo iptables -L INPUT -v -n'
 alias ip-all='sudo ip a | perl -nle"/(\d+\.\d+\.\d+\.\d+)/ && print $1"'
 alias ip-ext='curl -s ifconfig.me'
 alias journal-clean='sudo journalctl --vacuum-time=3d'
@@ -41,7 +53,8 @@ alias show-ports='sudo lsof -Pan -i tcp -i udp'
 alias sssh='ssh -o UserKnownHostsFile=/dev/null -o GlobalKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
 alias top='btop'
 alias untar='tar -xzvf'
-alias updall='sudo apt-get update && apt-get upgrade -y'
+alias updall='sudo apt-get update && sudo apt-get upgrade -y'
+alias updboot='sudo apt-get update && sudo apt-get upgrade -y && sudo apt-get autoremove -y && sudo reboot'
 alias wget-all='wget --random-wait -r -p -e robots=off -U mozilla -o $HOME/wget_all_log.txt'
 alias wget='wget -c'
 alias zombies='sudo ps aux | awk '\''{if ($8=="Z") { print $2 }}'\'''
@@ -148,7 +161,6 @@ export CLR_BBG_BLUE="\e[5;44m"
 export CLR_BBG_MAGENTA="\e[5;45m"
 export CLR_BBG_CYAN="\e[5;46m"
 
-
 # System
 export TZ='Europe/Berlin'
 export LANG='C.UTF-8'
@@ -187,19 +199,19 @@ cecho() {
         local color=${1:l}
     else
         local color=${1,,}
-    fi  # Convert to lowercase for case-insensitive matching
+    fi # Convert to lowercase for case-insensitive matching
 
     # Use a more efficient case statement with pattern matching
     case $color in
-        *blue*) if [[ $color == *b ]]; then colorvar=$CLR_BG_BLUE; elif [[ $color == l* ]]; then colorvar=$CLR_FG_LIGHTBLUE; else colorvar=$CLR_FG_BLUE; fi ;;
-        *green*) if [[ $color == *b ]]; then colorvar=$CLR_BG_GREEN; elif [[ $color == l* ]]; then colorvar=$CLR_FG_LIGHTGREEN; else colorvar=$CLR_FG_GREEN; fi ;;
-        cyan*) if [[ $color == *b ]]; then colorvar=$CLR_BG_CYAN; else colorvar=$CLR_FG_CYAN; fi ;;
-        gr*y*) if [[ $color == *b ]]; then colorvar=$CLR_BG_GRAY; else colorvar=$CLR_FG_GRAY; fi ;;
-        red*) if [[ $color == *b ]]; then colorvar=$CLR_BG_RED; else colorvar=$CLR_FG_RED; fi ;;
-        yellow*) if [[ $color == *b ]]; then colorvar=$CLR_BG_YELLOW; else colorvar=$CLR_FG_YELLOW; fi ;;
-        magenta*) if [[ $color == *b ]]; then colorvar=$CLR_BG_MAGENTA; else colorvar=$CLR_FG_MAGENTA; fi ;;
-        orange) colorvar=$CLR_FG_ORANGE ;;
-        *) colorvar=$CLR_CLEAR ;;
+    *blue*) if [[ $color == *b ]]; then colorvar=$CLR_BG_BLUE; elif [[ $color == l* ]]; then colorvar=$CLR_FG_LIGHTBLUE; else colorvar=$CLR_FG_BLUE; fi ;;
+    *green*) if [[ $color == *b ]]; then colorvar=$CLR_BG_GREEN; elif [[ $color == l* ]]; then colorvar=$CLR_FG_LIGHTGREEN; else colorvar=$CLR_FG_GREEN; fi ;;
+    cyan*) if [[ $color == *b ]]; then colorvar=$CLR_BG_CYAN; else colorvar=$CLR_FG_CYAN; fi ;;
+    gr*y*) if [[ $color == *b ]]; then colorvar=$CLR_BG_GRAY; else colorvar=$CLR_FG_GRAY; fi ;;
+    red*) if [[ $color == *b ]]; then colorvar=$CLR_BG_RED; else colorvar=$CLR_FG_RED; fi ;;
+    yellow*) if [[ $color == *b ]]; then colorvar=$CLR_BG_YELLOW; else colorvar=$CLR_FG_YELLOW; fi ;;
+    magenta*) if [[ $color == *b ]]; then colorvar=$CLR_BG_MAGENTA; else colorvar=$CLR_FG_MAGENTA; fi ;;
+    orange) colorvar=$CLR_FG_ORANGE ;;
+    *) colorvar=$CLR_CLEAR ;;
     esac
     echo -e "${colorvar}${message}${CLR_CLEAR}"
     return
@@ -215,20 +227,20 @@ check-port() {
         sudo ss -tulpn
 
         cecho yellow "\n*** lsof:"
-        sudo lsof -Pan -i tcp -i udp | sort -nk9  # Sort by port number
+        sudo lsof -Pan -i tcp -i udp | sort -nk9 # Sort by port number
 
         cecho yellow "\n*** netstat:"
-        sudo netstat -tulnp | sort -nk9  # Sort by port number
+        sudo netstat -tulnp | sort -nk9 # Sort by port number
     else
         cecho cyan "\nChecking port $1:"
         cecho yellow "\n*** ss:"
-        sudo ss -tulpn | grep -E ":$1\\s"  # More precise grep pattern
+        sudo ss -tulpn | grep -E ":$1\\s" # More precise grep pattern
 
         cecho yellow "\n*** lsof:"
         sudo lsof -Pan -i tcp -i udp | grep -E ":$1\\s"
 
         cecho yellow "\n*** netstat:"
-        sudo netstat -tulnp | grep -E ":$1\\s"  # More precise grep pattern
+        sudo netstat -tulnp | grep -E ":$1\\s" # More precise grep pattern
     fi
     cecho green '\nDone.'
 }
@@ -462,9 +474,9 @@ user-select-containers() {
 # Usage: dpsa
 dpsa() {
     printf "\033[0;93m\n┌╌ Docker containers ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌⦾\n╎\033[0;0m"
-    docker ps -a --format "table {{.Names}}{{.State}}\t{{.Names}}\t{{.Status}}" \
-    | sort \
-    | awk '/NAMES/ {next} {
+    docker ps -a --format "table {{.Names}}{{.State}}\t{{.Names}}\t{{.Status}}" |
+        sort |
+        awk '/NAMES/ {next} {
         if ($1 ~ /running/) {
             printf "\n\033[0;93m╎\033[0;0m\033[2;32m╌🟢 %-16s\033[0;0m\033[1;32m", $2;
             for (i=3;i<=NF;i++) printf "%s ", $i;
@@ -653,7 +665,6 @@ dcexec() {
     cecho green " Running command '$command' in $dccontainer ..."
     docker exec -it "$dccontainer" /bin/bash -c "$command"
 }
-
 
 export -f dpsa
 export -f dclogs
